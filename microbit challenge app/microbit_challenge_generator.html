@@ -1,0 +1,2143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>micro:bit Challenge Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #2d3748;
+            text-align: center;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .form-section {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        
+        .form-section h2 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            color: #2d3748;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #4a5568;
+            font-size: 0.95em;
+        }
+        
+        select, input, textarea {
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+        
+        select:focus, input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 25px 0;
+        }
+        
+        button {
+            padding: 14px 30px;
+            font-size: 1.05em;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #48bb78;
+        }
+        
+        .btn-secondary:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+        }
+        
+        .output-section {
+            margin-top: 30px;
+            display: none;
+        }
+        
+        .output-section.active {
+            display: block;
+        }
+        
+        .challenge-preview {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        
+        .challenge-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #000;
+        }
+        
+        .challenge-subtitle {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            color: #000;
+        }
+        
+        .challenge-goal {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin: 20px 0 10px 0;
+            color: #000;
+        }
+        
+        .challenge-content {
+            line-height: 1.6;
+            color: #000;
+        }
+        
+        .challenge-content ol {
+            margin-left: 20px;
+        }
+        
+        .challenge-content ul {
+            margin-left: 40px;
+            list-style-type: circle;
+        }
+        
+        .challenge-standards {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 2px solid #e2e8f0;
+            font-size: 0.9em;
+            color: #4a5568;
+        }
+        
+        .download-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        .btn-download {
+            padding: 12px 24px;
+            font-size: 0.95em;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            color: white;
+            transition: all 0.3s;
+        }
+        
+        .btn-txt { background: #4299e1; }
+        .btn-txt:hover { background: #3182ce; }
+        
+        .btn-pdf { background: #ed8936; }
+        .btn-pdf:hover { background: #dd6b20; }
+        
+        .btn-slides { background: #48bb78; }
+        .btn-slides:hover { background: #38a169; }
+        
+        .btn-tutorial { background: #9f7aea; }
+        .btn-tutorial:hover { background: #805ad5; }
+        
+        .instructions {
+            background: #edf2f7;
+            border-radius: 12px;
+            padding: 30px;
+            margin-top: 40px;
+        }
+        
+        .instructions h2 {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #2d3748;
+        }
+        
+        .instructions h3 {
+            font-size: 1.2em;
+            margin: 20px 0 10px 0;
+            color: #4a5568;
+        }
+        
+        .instructions ol, .instructions ul {
+            margin-left: 25px;
+            line-height: 1.8;
+            color: #4a5568;
+        }
+        
+        .instructions ol {
+            margin-bottom: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 micro:bit Challenge Generator</h1>
+        <p class="subtitle">Create customized coding challenges for students grades 4-6</p>
+        
+        <div class="form-section">
+            <h2>Challenge Settings</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="grade">Grade Level</label>
+                    <select id="grade">
+                        <option value="4">4th Grade</option>
+                        <option value="5">5th Grade</option>
+                        <option value="6">6th Grade</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="experience">Experience Level</label>
+                    <select id="experience">
+                        <option value="beginner">Beginner</option>
+                        <option value="experienced">Experienced</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="customIdea">Custom Challenge Idea (Optional)</label>
+                <textarea id="customIdea" placeholder="E.g., 'Create a mood ring that changes colors based on temperature' or leave blank for auto-generated challenges"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="batchCount">Number of Challenges</label>
+                <input type="number" id="batchCount" min="1" max="3" value="1">
+            </div>
+        </div>
+        
+        <div class="button-group">
+            <button class="btn-primary" onclick="generateChallenges()">🎲 Generate Challenges</button>
+            <button class="btn-secondary" onclick="generateTutorialReference()">📚 Download Tutorial Reference</button>
+            <button class="btn-secondary" onclick="refreshPage()" style="background: #ed8936;">🔄 Start Fresh</button>
+        </div>
+        
+        <div id="output" class="output-section"></div>
+        
+        <div class="instructions">
+            <h2>📖 Instructions for Teachers</h2>
+            
+            <h3>How to Use This Tool</h3>
+            <ol>
+                <li>Select your students' grade level and experience level</li>
+                <li>Choose how many challenges you want (1-3)</li>
+                <li>Click "Generate Challenges" to create customized activities</li>
+                <li>Download in your preferred format:
+                    <ul>
+                        <li><strong>TXT</strong> - Plain text for copying anywhere</li>
+                        <li><strong>PDF 3x5</strong> - Print on 3x5 index cards</li>
+                        <li><strong>PDF 4x6</strong> - Print on 4x6 index cards</li>
+                        <li><strong>Google Slides</strong> - Import into Google Slides or PowerPoint</li>
+                    </ul>
+                </li>
+            </ol>
+            
+            <h3>Importing to Google Slides</h3>
+            <ol>
+                <li>Download the PPTX file from this tool</li>
+                <li>Go to Google Slides and create a new presentation</li>
+                <li>Click File → Import slides</li>
+                <li>Upload the downloaded PPTX file</li>
+                <li>Select all slides and click "Import slides"</li>
+                <li>Customize colors, fonts, and add images as needed</li>
+            </ol>
+            
+            <h3>Importing to Canva</h3>
+            <ol>
+                <li>Download the PDF or PPTX file</li>
+                <li>Go to Canva and create a new design (Presentation or Custom size)</li>
+                <li>Click "Uploads" in the left sidebar</li>
+                <li>Upload your PDF or PPTX file</li>
+                <li>Drag pages into your design</li>
+                <li>Edit text, add branding, and customize</li>
+            </ol>
+            
+            <h3>Tutorial Reference</h3>
+            <p>Click "Download Tutorial Reference" to get a CSV file mapping each challenge to relevant MakeCode tutorials. This helps you guide students to prerequisite lessons before attempting challenges.</p>
+            
+            <h3>About the Challenge Library</h3>
+            <p><strong>How many templates?</strong> Currently <strong>60 unique challenge templates</strong> across beginner (13 challenges), intermediate (20 challenges), and advanced (15 challenges) for grades 4-6.</p>
+            <p><strong>Will I see repeats?</strong> Very unlikely! With 60 templates randomized per generation, you can use this tool extensively before seeing duplicates. Click "Start Fresh" between generations for maximum variety.</p>
+            <p><strong>What concepts are covered?</strong> Inputs, sensors, variables, loops, conditionals, arrays, radio (2-5 micro:bits), strings, time, math, algorithms, state machines, networking, and machine learning basics.</p>
+            <p><strong>What's NOT included?</strong> External components (motors, servos, additional sensors beyond built-in). This version uses only core micro:bit features (built-in sensors, LEDs, radio, buttons, accelerometer, compass, temperature, light).</p>
+            
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 12px; margin: 25px 0;">
+                <h3 style="color: white; margin-top: 0;">🚀 Want More Challenges?</h3>
+                <p style="margin-bottom: 15px;">The <strong>Premium Library</strong> includes 60+ advanced challenges with:</p>
+                <ul style="margin-left: 20px; margin-bottom: 20px; line-height: 1.8;">
+                    <li>External component projects (motors, sensors, displays)</li>
+                    <li>Multi-micro:bit collaborative challenges</li>
+                    <li>Cross-curricular integration (math, science, art)</li>
+                    <li>Full standards alignment with learning objectives</li>
+                    <li>Assessment rubrics and student handouts</li>
+                </ul>
+                <p style="margin-bottom: 0;"><strong>Coming Soon!</strong> Interested? Email: <a href="mailto:rucha@indyri.se?subject=Premium Library Waitlist" style="color: #ffd700; font-weight: bold;">rucha@indyri.se</a></p>
+            </div>
+            
+            <h3>About Standards</h3>
+            <p>All challenges are automatically mapped to CSTA (Computer Science Teachers Association) and NGSS (Next Generation Science Standards) for grades K-8. Standards codes appear at the bottom of each challenge card.</p>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PizZip/3.1.5/pizzip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.42.3/docxtemplater.min.js"></script>
+    <script>
+        // Challenge library with base challenges
+        const challengeLibrary = [
+            {
+                id: 'system_check',
+                title: 'System Check',
+                subtitle: '',
+                goal: 'Test all basic micro:bit inputs',
+                concepts: ['inputs', 'buttons', 'shake', 'display'],
+                setup: [],
+                steps: [
+                    'When button A is pressed → show a dot',
+                    'When button B is pressed → play a tone',
+                    'When shaken → scroll "OK"',
+                    'When A+B pressed → show a checkmark'
+                ],
+                challenges: [],
+                grades: [4, 5, 6],
+                experience: ['beginner'],
+                tutorial: 'Flashing Heart, Buttons',
+                standards: ['CSTA 1A-AP-10', 'CSTA 1A-AP-11']
+            },
+            {
+                id: 'tilt_counter',
+                title: 'Tilt Counter',
+                subtitle: '',
+                goal: 'Count tilts using a variable',
+                concepts: ['variables', 'input', 'tilt'],
+                setup: ['Create variable "count"'],
+                steps: [
+                    'On tilt left → change count by 1',
+                    'On button A pressed → show count',
+                    'On button B pressed → set count to 0'
+                ],
+                challenges: ['Try tilt right instead', 'Count down from 10'],
+                grades: [4, 5],
+                experience: ['beginner'],
+                tutorial: 'Dice, Love Meter',
+                standards: ['CSTA 1A-AP-09', 'CSTA 1B-AP-09']
+            },
+            {
+                id: 'dice',
+                title: '6-Sided Die',
+                subtitle: '',
+                goal: 'Generate random numbers',
+                concepts: ['variables', 'random', 'shake'],
+                setup: ['Create variable "roll"'],
+                steps: [
+                    'On shake → set roll to random 1 to 6',
+                    'Show the number on the display',
+                    'Make it stable and repeatable'
+                ],
+                challenges: ['Make a 20-sided die', 'Add sound effects', 'Show dots instead of numbers'],
+                grades: [4, 5, 6],
+                experience: ['beginner'],
+                tutorial: 'Dice',
+                standards: ['CSTA 1B-AP-09', 'CSTA 1B-AP-10']
+            },
+            {
+                id: 'logic_test',
+                title: 'Simple Logic Test',
+                subtitle: '',
+                goal: 'Use conditionals with buttons',
+                concepts: ['conditionals', 'buttons', 'display'],
+                setup: [],
+                steps: [
+                    'If A pressed → show heart',
+                    'If B pressed → show square',
+                    'If both pressed → show star'
+                ],
+                challenges: ['Add more shapes', 'Add sound to each', 'Create a pattern sequence'],
+                grades: [4, 5, 6],
+                experience: ['beginner', 'experienced'],
+                tutorial: 'Smiley Buttons',
+                standards: ['CSTA 1B-AP-10', 'CSTA 1B-AP-12']
+            },
+            {
+                id: 'lock_unlock',
+                title: 'Lock/Unlock',
+                subtitle: '',
+                goal: 'Create a secure sequence',
+                concepts: ['conditionals', 'sequence', 'logic'],
+                setup: [],
+                steps: [
+                    'Create a 3-step unlock sequence using any inputs',
+                    'Correct sequence shows "UNLOCKED"',
+                    'Any mistake resets the sequence'
+                ],
+                challenges: ['Make a 5-step sequence', 'Add a lockout timer', 'Create difficulty levels'],
+                grades: [5, 6],
+                experience: ['experienced'],
+                tutorial: 'Rock Paper Scissors',
+                standards: ['CSTA 1B-AP-10', 'CSTA 1B-AP-12', 'CSTA 2-AP-13']
+            },
+            {
+                id: 'pedometer_tracker',
+                title: 'Pedometer - Tracker micro:bit',
+                subtitle: '(Goes on your foot)',
+                goal: 'Send step data wirelessly',
+                concepts: ['radio', 'loops', 'time'],
+                setup: ['Set radio group number'],
+                steps: [
+                    'Go to MakeCode and start new project',
+                    'From Radio: drag "radio set group" → put in "on start"',
+                    'From Loops: drag "forever"',
+                    'Inside forever: add "radio send number (running time)"',
+                    'Add "show icon (heart)" inside forever',
+                    'Download and test: heart should blink when sending'
+                ],
+                challenges: ['Add battery indicator', 'Send step count instead of time'],
+                grades: [5, 6],
+                experience: ['experienced'],
+                tutorial: 'Fireflies (Radio)',
+                standards: ['CSTA 1B-AP-13', 'CSTA 2-AP-16']
+            },
+            {
+                id: 'pedometer_display',
+                title: 'Pedometer - Display micro:bit',
+                subtitle: '(Hold in your hand)',
+                goal: 'Receive and display step data',
+                concepts: ['radio', 'display'],
+                setup: ['Set same radio group as tracker'],
+                steps: [
+                    'From Radio: "radio set group" (same number as tracker)',
+                    'From Radio: "on radio received number"',
+                    'Inside it: "show number (receivedNumber)"',
+                    'Download and test with tracker micro:bit'
+                ],
+                challenges: ['Add a reset button', 'Show graph instead of number'],
+                grades: [5, 6],
+                experience: ['experienced'],
+                tutorial: 'Fireflies (Radio)',
+                standards: ['CSTA 1B-AP-13', 'CSTA 2-AP-16']
+            },
+            {
+                id: 'step_challenge',
+                title: 'Step Challenge',
+                subtitle: '(Goes on foot)',
+                goal: 'Track steps and reach a goal',
+                concepts: ['variables', 'conditionals', 'shake'],
+                setup: ['Create variable "steps"', 'Create variable "goal" = 20'],
+                steps: [
+                    'On start → set steps to 0',
+                    'On shake → change steps by 1',
+                    'If steps > goal → show celebration and reset',
+                    'Button A shows steps',
+                    'Button B shows goal'
+                ],
+                challenges: ['Change goal number', 'Add music when you win', 'Race with a friend'],
+                grades: [4, 5, 6],
+                experience: ['beginner', 'experienced'],
+                tutorial: 'Step Counter',
+                standards: ['CSTA 1B-AP-09', 'CSTA 1B-AP-10', 'NGSS 3-5-ETS1-2']
+            },
+            {
+                id: 'temperature_alert',
+                title: 'Temperature Alert Band',
+                subtitle: '(Goes on wrist)',
+                goal: 'Monitor temperature changes',
+                concepts: ['sensors', 'conditionals', 'loops'],
+                setup: ['Create variable "temp"'],
+                steps: [
+                    'Forever loop:',
+                    '  Set temp = temperature (°C)',
+                    '  If temp > 25 → show "HOT"',
+                    '  Else if temp < 20 → show "COLD"',
+                    '  Else → show "OK"',
+                    '  Pause 1000 ms'
+                ],
+                challenges: ['Test in fridge', 'Warm with your hand', 'Compare indoor vs outdoor'],
+                grades: [4, 5, 6],
+                experience: ['beginner', 'experienced'],
+                tutorial: 'Temperature',
+                standards: ['CSTA 1B-AP-10', 'NGSS 3-5-ETS1-1', 'NGSS MS-PS3-3']
+            },
+            {
+                id: 'radio_hifive',
+                title: 'Radio Hi-Five',
+                subtitle: '(Work in pairs)',
+                goal: 'Send and receive messages',
+                concepts: ['radio', 'strings', 'buttons'],
+                setup: ['Both micro:bits use same radio group'],
+                steps: [
+                    'Set radio group to any number',
+                    'When button A pressed → send a message',
+                    'When message received → show happy face',
+                    'Partner\'s micro:bit shows the face'
+                ],
+                challenges: ['Add button B for different message', 'Create secret codes'],
+                grades: [5, 6],
+                experience: ['experienced'],
+                tutorial: 'Fireflies (Radio)',
+                standards: ['CSTA 1B-AP-13', 'CSTA 2-AP-16', 'NGSS MS-PS4-3']
+            },
+            {
+                id: 'radio_freeze',
+                title: 'Radio Freeze Signal',
+                subtitle: '(Take turns being Leader)',
+                goal: 'Control multiple micro:bits',
+                concepts: ['radio', 'strings', 'conditionals', 'animation'],
+                setup: ['One Leader, multiple Players'],
+                steps: [
+                    'Leader: Button A sends "GO", Button B sends "FREEZE"',
+                    'Players: When "GO" received → show animation',
+                    'Players: When "FREEZE" received → stop and show icon'
+                ],
+                challenges: ['Add more commands', 'Create a Simon Says game'],
+                grades: [5, 6],
+                experience: ['experienced'],
+                tutorial: 'Hot Potato (Radio)',
+                standards: ['CSTA 2-AP-13', 'CSTA 2-AP-16', 'NGSS MS-PS4-3']
+            },
+            {
+                id: 'calculator',
+                title: 'Calculator',
+                subtitle: '',
+                goal: 'Use arrays to cycle through operations',
+                concepts: ['arrays', 'variables', 'buttons', 'logic'],
+                setup: ['Create array "operations" with ["+", "-", "×", "÷"]', 'Create variable "index" = 0', 'Create variables "num1" and "num2"'],
+                steps: [
+                    'Button A (multiple presses) → increase num1 by 1',
+                    'Button B (multiple presses) → increase num2 by 1',
+                    'Logo touch → cycle through operations array (change index)',
+                    'A+B together → calculate and display result',
+                    'Show current operation on display',
+                    'After result: reset all to 0'
+                ],
+                challenges: ['Add decimal support', 'Show equation before result', 'Add memory function'],
+                grades: [4, 5, 6],
+                experience: ['experienced'],
+                tutorial: 'Heads Up (Arrays)',
+                standards: ['CSTA 1B-AP-09', 'CSTA 2-AP-14', 'NGSS 3-5-ETS1-2']
+            },
+            // BEGINNER CHALLENGES (13-25)
+            {
+                id: 'name_badge',
+                title: 'Scrolling Name Badge',
+                subtitle: '',
+                goal: 'Display your name on the LED screen',
+                concepts: ['display', 'strings'],
+                setup: [],
+                steps: [
+                    'On start → show string with your name',
+                    'Add a pause between letters',
+                    'On button A → show a smiley face',
+                    'On button B → clear the screen'
+                ],
+                challenges: ['Add your favorite emoji', 'Make it scroll faster/slower', 'Add a welcome message'],
+                grades: [4, 5],
+                experience: ['beginner'],
+                tutorial: 'Name Tag',
+                standards: ['CSTA 1A-AP-10', 'CSTA 1A-AP-11']
+            },
+            {
+                id: 'emoji_mood',
+                title: 'Emoji Mood Selector',
+                subtitle: '',
+                goal: 'Show different emojis based on button presses',
+                concepts: ['inputs', 'display'],
+                setup: [],
+                steps: [
+                    'Button A → show happy face',
+                    'Button B → show sad face',
+                    'Shake → show surprised face',
+                    'A+B → show heart'
+                ],
+                challenges: ['Add more emotions', 'Make them animate', 'Add sounds to each'],
+                grades: [4, 5],
+                experience: ['beginner'],
+                tutorial: 'Smiley Buttons',
+                standards: ['CSTA 1A-AP-10', 'CSTA 1A-AP-11']
+            },
+            {
+                id: 'countdown_timer',
+                title: 'Simple Countdown Timer',
+                subtitle: '',
+                goal: 'Count down from 10 to 0',
+                concepts: ['loops', 'display', 'time'],
+                setup: ['Create variable "count" = 10'],
+                steps: [
+                    'On button A pressed → start countdown',
+                    'Use repeat 10 times block',
+                    'Show count, pause 1 second, decrease by 1',
+                    'At 0 → show "GO!" and play sound'
+                ],
+                challenges: ['Count down from 60', 'Add pause/resume', 'Make it count up instead'],
+                grades: [4, 5, 6],
+                experience: ['beginner'],
+                tutorial: 'Countdown',
+                standards: ['CSTA 1B-AP-11', 'CSTA 1B-AP-12']
+            },
+            {
+                id: 'light_meter',
+                title: 'Light Level Meter',
+                subtitle: '',
+                goal: 'Show how bright the room is',
+                concepts: ['sensors', 'display'],
+                setup: [],
+                steps: [
+                    'Forever loop → read light level',
+                    'Show number of bars based on brightness',
+                    'Dark (0-50) → 1 LED, Medium (51-150) → 3 LEDs, Bright (151+) → 5 LEDs',
+                    'Update every second'
+                ],
+                challenges: ['Add color coding', 'Create a nightlight mode', 'Log highest/lowest readings'],
+                grades: [4, 5, 6],
+                experience: ['beginner'],
+                tutorial: 'Light Level',
+                standards: ['NGSS 3-5-ETS1-1', 'CSTA 1B-AP-10']
+            },
+            {
+                id: 'magic_8ball',
+                title: 'Magic 8-Ball',
+                subtitle: '',
+                goal: 'Give random yes/no/maybe answers',
+                concepts: ['random', 'shake', 'arrays'],
+                setup: ['Create array with answers: ["Yes", "No", "Maybe", "Ask again"]'],
+                steps: [
+                    'On shake → pick random answer from array',
+                    'Show the answer on screen',
+                    'Add a pause before showing answer',
+                    'Play a sound when showing answer'
+                ],
+                challenges: ['Add more answers', 'Make it glow different colors', 'Track how many questions asked'],
+                grades: [4, 5, 6],
+                experience: ['beginner'],
+                tutorial: 'Magic 8',
+                standards: ['CSTA 1B-AP-09', 'CSTA 2-AP-14']
+            },
+            {
+                id: 'reaction_timer',
+                title: 'Reaction Time Game',
+                subtitle: '',
+                goal: 'Test how fast you can react',
+                concepts: ['time', 'random', 'variables'],
+                setup: ['Create variable "startTime"', 'Create variable "reactionTime"'],
+                steps: [
+                    'On start → wait random 1-5 seconds',
+                    'Show icon and save current time',
+                    'On button A pressed → calculate reaction time',
+                    'Show result in milliseconds'
+                ],
+                challenges: ['Best of 3 attempts', 'Compare with a friend', 'Add difficulty levels'],
+                grades: [5, 6],
+                experience: ['beginner'],
+                tutorial: 'Reaction Time',
+                standards: ['CSTA 1B-AP-09', 'CSTA 1B-AP-10', 'NGSS 3-5-ETS1-2']
+            },
+            {
+                id: 'clap_counter',
+                title: 'Clap Counter',
+                subtitle: '',
+                goal: 'Count loud sounds (claps)',
+                concepts: ['sensors', 'variables', 'events'],
+                setup: ['Create variable "claps" = 0'],
+                steps: [
+                    'On loud sound → increase claps by 1',
+                    'Show current count',
+                    'Button A → show total claps',
+                    'Button B → reset to 0'
+                ],
+                challenges: ['Set a clap goal', 'Make patterns with claps', 'Race with a friend'],
+                grades: [4, 5, 6],
+                experience: ['beginner'],
+                tutorial: 'Clap Lights',
+                standards: ['CSTA 1B-AP-09', 'NGSS 3-5-ETS1-1']
+            },
+            {
+                id: 'coin_flip',
+                title: 'Coin Flip Simulator',
+                subtitle: '',
+                goal: 'Flip a virtual coin',
+                concepts: ['random', 'conditionals'],
+                setup: ['Create variable "flip"'],
+                steps: [
+                    'On shake → set flip to random 0 or 1',
+                    'If flip = 0 → show "H" for heads',
+                    'If flip = 1 → show "T" for tails',
+                    'Add animation before showing result'
+                ],
+                challenges: ['Track heads vs tails count', 'Flip multiple coins', 'Add a sound effect'],
+                grades: [4, 5],
+                experience: ['beginner'],
+                tutorial: 'Coin Flipper',
+                standards: ['CSTA 1B-AP-09', 'CSTA 1B-AP-10']
+            },
+            {
+                id: 'compass_direction',
+                title: 'Digital Compass',
+                subtitle: '',
+                goal: 'Show which direction you\'re facing',
+                concepts: ['sensors', 'compass', 'conditionals'],
+                setup: [],
+                steps: [
+                    'Forever → read compass heading',
+                    'If heading 315-45 → show "N"',
+                    'If heading 45-135 → show "E"',
+                    'If heading 135-225 → show "S"',
+                    'If heading 225-315 → show "W"'
+                ],
+                challenges: ['Add NE, NW, SE, SW', 'Create a treasure hunt game', 'Point to a specific direction'],
+                grades: [5, 6],
+                experience: ['beginner'],
+                tutorial: 'Compass',
+                standards: ['NGSS 3-5-ETS1-1', 'CSTA 1B-AP-10']
+            },
+            {
+                id: 'stopwatch',
+                title: 'Simple Stopwatch',
+                subtitle: '',
+                goal: 'Time events in seconds',
+                concepts: ['time', 'variables', 'buttons'],
+                setup: ['Create variable "seconds" = 0', 'Create variable "running" = false'],
+                steps: [
+                    'Button A → start/stop timer',
+                    'While running → increase seconds every 1000ms',
+                    'Show current seconds on display',
+                    'Button B → reset to 0'
+                ],
+                challenges: ['Add minutes', 'Add lap times', 'Create split timer'],
+                grades: [5, 6],
+                experience: ['beginner'],
+                tutorial: 'Stop Watch',
+                standards: ['CSTA 1B-AP-09', 'CSTA 1B-AP-10']
+            },
+            {
+                id: 'breathing_exercise',
+                title: 'Breathing Exercise Guide',
+                subtitle: '',
+                goal: 'Guide calm breathing with LED animation',
+                concepts: ['loops', 'display', 'animation'],
+                setup: [],
+                steps: [
+                    'Forever → show growing circle (breathe in, 4 seconds)',
+                    'Hold for 2 seconds',
+                    'Show shrinking circle (breathe out, 4 seconds)',
+                    'Repeat with calming icon'
+                ],
+                challenges: ['Add different breathing patterns', 'Track number of breaths', 'Add gentle sounds'],
+                grades: [4, 5, 6],
+                experience: ['beginner'],
+                tutorial: 'Animation',
+                standards: ['CSTA 1B-AP-11']
+            },
+            {
+                id: 'gesture_control',
+                title: 'Gesture Recognition',
+                subtitle: '',
+                goal: 'Respond to different movements',
+                concepts: ['accelerometer', 'gestures', 'display'],
+                setup: [],
+                steps: [
+                    'On logo up → show up arrow',
+                    'On logo down → show down arrow',
+                    'On screen up → show happy face',
+                    'On screen down → show sad face',
+                    'On shake → show random icon'
+                ],
+                challenges: ['Create a gesture game', 'Add more gestures', 'Make a story with gestures'],
+                grades: [4, 5, 6],
+                experience: ['beginner'],
+                tutorial: 'Gestures',
+                standards: ['CSTA 1A-AP-10', 'NGSS 3-5-ETS1-1']
+            },
+            // INTERMEDIATE CHALLENGES (26-45)
+            {
+                id: 'score_keeper',
+                title: 'Two Player Score Keeper',
+                subtitle: '',
+                goal: 'Track scores for two players',
+                concepts: ['variables', 'buttons', 'display'],
+                setup: ['Create variable "player1Score" = 0', 'Create variable "player2Score" = 0'],
+                steps: [
+                    'Button A → add 1 to player1Score',
+                    'Button B → add 1 to player2Score',
+                    'A+B together → show both scores',
+                    'Shake → reset both to 0',
+                    'Show winner icon if one reaches 10'
+                ],
+                challenges: ['Add best of 3 rounds', 'Track win history', 'Make it work for 3-4 players'],
+                grades: [5, 6],
+                experience: ['experienced'],
+                tutorial: 'Score Keeper',
+                standards: ['CSTA 1B-AP-09', 'CSTA 1B-AP-10', 'CSTA 2-AP-13']
+            },
+            {
+                id: 'morse_code',
+                title: 'Morse Code Translator',
+                subtitle: '',
+                goal: 'Send messages in Morse code',
+                concepts: ['arrays', 'strings', 'loops'],
+                setup: ['Create array of Morse patterns'],
+                steps: [
+                    'Store letters and their Morse code',
+                    'Input a message using buttons',
+                    'Use for loop to convert to Morse',
+                    'Flash LED for dots (short) and dashes (long)',
+                    'Add sound for each signal'
+                ],
+                challenges: ['Decode incoming Morse', 'Send SOS automatically', 'Add numbers 0-9'],
+                grades: [5, 6],
+                experience: ['experienced'],
+                tutorial: 'Arrays',
+                standards: ['CSTA 2-AP-14', 'CSTA 1B-AP-11']
+            },
+            {
+                id: 'fitness_tracker',
+                title: 'Daily Fitness Tracker',
+                subtitle: '',
+                goal: 'Track multiple exercise types',
+                concepts: ['variables', 'conditionals', 'display'],
+                setup: ['Variables for steps, jumps, exercises'],
+                steps: [
+                    'Button A cycles through exercise types',
+                    'Shake counts the current exercise',
+                    'Button B shows summary of all activities',
+                    'Logo touch resets daily count',
+                    'Show progress bar toward goal'
+                ],
+                challenges: ['Add weekly totals', 'Set custom goals', 'Share with friend via radio'],
+                grades: [5, 6],
+                experience: ['experienced'],
+                tutorial: 'Step Counter',
+                standards: ['CSTA 1B-AP-09', 'CSTA 2-AP-13', 'NGSS 3-5-ETS1-2']
+            },
+            {
+                id: 'simon_says',
+                title: 'Simon Says Memory Game',
+                subtitle: '',
+                goal: 'Remember and repeat pattern sequences',
+                concepts: ['arrays', 'loops', 'inputs', 'random'],
+                setup: ['Create array "pattern" (empty)', 'Create variable "playerIndex" = 0'],
+                steps: [
+                    'Add random direction to pattern array',
+                    'Use for loop to show pattern with icons',
+                    'Player inputs sequence using buttons/tilt',
+                    'Check if input matches pattern',
+                    'Increase difficulty each round'
+                ],
+                challenges: ['Add sounds to pattern', 'Speed up playback', '2-player mode via radio'],
+                grades: [5, 6],
+                experience: ['experienced'],
+                tutorial: 'Arrays',
+                standards: ['CSTA 2-AP-14', 'CSTA 1B-AP-11', 'CSTA 2-AP-13']
+            },
+            {
+                id: 'weather_station',
+                title: 'Mini Weather Station',
+                subtitle: '',
+                goal: 'Monitor temperature and light trends',
+                concepts: ['sensors', 'arrays', 'loops'],
+                setup: ['Array for temperature readings', 'Array for light readings'],
+                steps: [
+                    'Every 10 seconds → read temp and light',
+                    'Store in arrays (keep last 10 readings)',
+                    'Button A → show average temperature',
+                    'Button B → show average light level',
+                    'Shake → show trend (increasing/decreasing)'
+                ],
+                challenges: ['Create weather alerts', 'Log data over 24 hours', 'Compare indoor/outdoor'],
+                grades: [5, 6],
+                experience: ['experienced'],
+                tutorial: 'Temperature',
+                standards: ['NGSS MS-PS3-3', 'CSTA 2-AP-14', 'NGSS 3-5-ETS1-1']
+            },
+            {
+                id: 'binary_counter',
+                title: 'Binary Number Display',
+                subtitle: '',
+                goal: 'Count in binary on LED grid',
+                concepts: ['binary', 'loops', 'math'],
+                setup: ['Create variable "number" = 0'],
+                steps: [
+                    'Convert number to binary representation',
+                    'Display each bit as LED (on/off)',
+                    'Button A → count up',
+                    'Button B → count down',
+                    'Show both binary and decimal'
+                ],
+                challenges: ['Count to 31 (5 bits)', 'Binary to decimal quiz', 'Show hexadecimal too'],
+                grades: [6],
+                experience: ['experienced'],
+                tutorial: 'Binary',
+                standards: ['CSTA 2-AP-10', 'CSTA 2-AP-14']
+            },
+            {
+                id: 'alarm_clock',
+                title: 'Programmable Alarm Clock',
+                subtitle: '',
+                goal: 'Set and trigger alarms at specific times',
+                concepts: ['time', 'variables', 'conditionals'],
+                setup: ['Variables for hour, minute, alarmSet'],
+                steps: [
+                    'Button A → set alarm hour',
+                    'Button B → set alarm minute',
+                    'A+B → activate/deactivate alarm',
+                    'Check time every second',
+                    'When time matches → flash and sound'
+                ],
+                challenges: ['Multiple alarms', 'Snooze function', 'Weekend vs weekday'],
+                grades: [5, 6],
+                experience: ['experienced'],
+                tutorial: 'Time',
+                standards: ['CSTA 1B-AP-10', 'CSTA 2-AP-13']
+            },
+            {
+                id: 'encryption',
+                title: 'Caesar Cipher Encoder',
+                subtitle: '',
+                goal: 'Encrypt and decrypt messages',
+                concepts: ['strings', 'arrays', 'loops', 'math'],
+                setup: ['Create variable "shift" = 3', 'Array of alphabet'],
+                steps: [
+                    'Input message letter by letter',
+                    'Shift each letter by shift value',
+                    'Display encrypted message',
+                    'Button to decrypt back',
+                    'Allow custom shift values'
+                ],
+                challenges: ['Add space and punctuation handling', 'Auto-detect shift', 'Try other ciphers'],
+                grades: [6],
+                experience: ['experienced'],
+                tutorial: 'Crypto',
+                standards: ['CSTA 2-AP-14', 'CSTA 2-AP-11']
+            },
+            {
+                id: 'plant_monitor',
+                title: 'Plant Care Monitor',
+                subtitle: '',
+                goal: 'Track plant health metrics',
+                concepts: ['sensors', 'conditionals', 'time'],
+                setup: ['Variables for temp, light, lastWater'],
+                steps: [
+                    'Monitor temperature and light continuously',
+                    'If temp too hot/cold → show warning',
+                    'If light too low → show sun icon',
+                    'Button A → log watering time',
+                    'Show days since last watered'
+                ],
+                challenges: ['Add moisture sensor', 'Track growth over weeks', 'Multi-plant monitoring'],
+                grades: [5, 6],
+                experience: ['experienced'],
+                tutorial: 'Temperature, Time',
+                standards: ['NGSS MS-LS1-6', 'CSTA 2-AP-13', 'NGSS 3-5-ETS1-1']
+            },
+            {
+                id: 'metronome',
+                title: 'Musical Metronome',
+                subtitle: '',
+                goal: 'Keep steady beat for music practice',
+                concepts: ['time', 'sound', 'variables'],
+                setup: ['Variable "bpm" = 60', 'Variable "playing" = false'],
+                steps: [
+                    'Calculate milliseconds per beat from BPM',
+                    'Button A → increase BPM by 10',
+                    'Button B → decrease BPM by 10',
+                    'A+B → start/stop metronome',
+                    'Flash LED and play click on each beat'
+                ],
+                challenges: ['Add time signatures (3/4, 4/4)', 'Visual beat patterns', 'Tempo presets'],
+                grades: [5, 6],
+                experience: ['experienced'],
+                tutorial: 'Music',
+                standards: ['CSTA 1B-AP-09', 'CSTA 2-AP-13']
+            },
+            {
+                id: 'treasure_hunt',
+                title: 'Compass Treasure Hunt',
+                subtitle: '',
+                goal: 'Guide player to hidden treasure location',
+                concepts: ['compass', 'conditionals', 'math'],
+                setup: ['Variables for treasure direction and distance'],
+                steps: [
+                    'Set treasure heading (e.g., 45° NE)',
+                    'Read current compass heading',
+                    'Calculate difference from treasure',
+                    'Show arrow pointing toward treasure',
+                    'Get warmer/colder feedback'
+                ],
+                challenges: ['Multiple treasures', '2-player hide and seek', 'Add radio hints'],
+                grades: [5, 6],
+                experience: ['experienced'],
+                tutorial: 'Compass',
+                standards: ['NGSS 3-5-ETS1-1', 'CSTA 2-AP-13']
+            },
+            {
+                id: 'quiz_buzzer',
+                title: 'Quiz Show Buzzer System',
+                subtitle: '',
+                goal: 'First person to buzz wins',
+                concepts: ['radio', 'time', 'variables'],
+                setup: ['Each micro:bit has player ID', 'Host micro:bit receives'],
+                steps: [
+                    'All micro:bits listen for button press',
+                    'First press sends player ID via radio',
+                    'Host receives and displays winner',
+                    'Lock out other players',
+                    'Reset for next question'
+                ],
+                challenges: ['Add scoring system', 'Penalty for wrong answer', '4+ players'],
+                grades: [5, 6],
+                experience: ['experienced'],
+                tutorial: 'Radio',
+                standards: ['CSTA 2-AP-16', 'NGSS MS-PS4-3']
+            },
+            {
+                id: 'voting_system',
+                title: 'Anonymous Voting System',
+                subtitle: '',
+                goal: 'Collect and tally votes privately',
+                concepts: ['radio', 'arrays', 'variables'],
+                setup: ['Array "votes" on host', 'Player micro:bits send choices'],
+                steps: [
+                    'Host displays question options',
+                    'Players press A (yes) or B (no)',
+                    'Send vote via radio anonymously',
+                    'Host tallies in array',
+                    'Display results when voting closes'
+                ],
+                challenges: ['Multiple choice (A/B/C)', 'Prevent double voting', 'Real-time results'],
+                grades: [6],
+                experience: ['experienced'],
+                tutorial: 'Radio',
+                standards: ['CSTA 2-AP-16', 'CSTA 2-AP-14']
+            },
+            {
+                id: 'reflex_race',
+                title: 'Multiplayer Reflex Race',
+                subtitle: '',
+                goal: 'Race to react fastest across micro:bits',
+                concepts: ['radio', 'time', 'random'],
+                setup: ['Host generates random start time', 'Players have unique IDs'],
+                steps: [
+                    'Host counts down via radio',
+                    'After random delay → send GO signal',
+                    'Players press button when they see GO',
+                    'Send reaction time to host',
+                    'Host displays winner and times'
+                ],
+                challenges: ['Best of 3 rounds', 'False start detection', 'Team mode'],
+                grades: [5, 6],
+                experience: ['experienced'],
+                tutorial: 'Radio, Reaction Game',
+                standards: ['CSTA 2-AP-16', 'NGSS 3-5-ETS1-2']
+            },
+            {
+                id: 'data_logger',
+                title: 'Environmental Data Logger',
+                subtitle: '',
+                goal: 'Record sensor data over time',
+                concepts: ['sensors', 'arrays', 'time', 'loops'],
+                setup: ['Arrays for timestamps and readings'],
+                steps: [
+                    'Every 60 seconds → read temperature/light',
+                    'Store time and value in parallel arrays',
+                    'Button A → show latest reading',
+                    'Button B → show min/max/average',
+                    'Shake → export data summary'
+                ],
+                challenges: ['24-hour logging', 'Graph data on LEDs', 'Compare multiple days'],
+                grades: [6],
+                experience: ['experienced'],
+                tutorial: 'Arrays, Temperature',
+                standards: ['NGSS MS-PS3-3', 'CSTA 2-AP-14', 'NGSS 3-5-ETS1-3']
+            },
+            {
+                id: 'step_challenge',
+                title: 'Team Step Challenge',
+                subtitle: '',
+                goal: 'Compete in step count with teammates',
+                concepts: ['accelerometer', 'radio', 'variables'],
+                setup: ['Each player tracks own steps', 'Radio for sharing'],
+                steps: [
+                    'Count steps using shake detection',
+                    'Button A → send step count to team',
+                    'Receive teammates steps via radio',
+                    'Calculate team total',
+                    'Show team progress vs goal'
+                ],
+                challenges: ['Daily/weekly leaderboards', 'Individual vs team goals', 'Streak tracking'],
+                grades: [5, 6],
+                experience: ['experienced'],
+                tutorial: 'Step Counter, Radio',
+                standards: ['CSTA 2-AP-16', 'NGSS 3-5-ETS1-2']
+            },
+            {
+                id: 'music_sync',
+                title: 'Synchronized Music Player',
+                subtitle: '',
+                goal: 'Play music in sync across devices',
+                concepts: ['radio', 'sound', 'time', 'arrays'],
+                setup: ['Array of note sequences', 'Conductor micro:bit controls'],
+                steps: [
+                    'Conductor sends note via radio',
+                    'All players receive and play note',
+                    'Use timing to stay synchronized',
+                    'Support different instruments per player',
+                    'Conductor controls tempo'
+                ],
+                challenges: ['Multi-part harmony', 'Volume control', 'Record and playback'],
+                grades: [6],
+                experience: ['experienced'],
+                tutorial: 'Radio, Music',
+                standards: ['CSTA 2-AP-16', 'CSTA 2-AP-14']
+            },
+            {
+                id: 'collaborative_art',
+                title: 'Collaborative LED Art',
+                subtitle: '',
+                goal: 'Create shared pixel art across multiple micro:bits',
+                concepts: ['radio', 'arrays', 'coordinates'],
+                setup: ['Each micro:bit shows 5x5 section of larger canvas'],
+                steps: [
+                    'Button A → draw pixel at current position',
+                    'Tilt to move cursor',
+                    'Send pixel updates via radio',
+                    'All micro:bits update their section',
+                    'Create combined artwork'
+                ],
+                challenges: ['Color coding with brightness', 'Save/load artwork', 'Animation mode'],
+                grades: [6],
+                experience: ['experienced'],
+                tutorial: 'Radio, LED',
+                standards: ['CSTA 2-AP-16', 'CSTA 2-AP-14']
+            },
+            {
+                id: 'tag_game',
+                title: 'Wireless Tag Game',
+                subtitle: '',
+                goal: 'Play tag using radio signals',
+                concepts: ['radio', 'variables', 'time'],
+                setup: ['One player starts as "it"', 'All players in radio group'],
+                steps: [
+                    '"It" player flashes special pattern',
+                    'When close to another player → send tag via radio',
+                    'Tagged player becomes "it"',
+                    'Track who was "it" longest',
+                    'Show status on each micro:bit'
+                ],
+                challenges: ['Safe zones', 'Team tag', 'Power-ups via radio'],
+                grades: [5, 6],
+                experience: ['experienced'],
+                tutorial: 'Radio, Fireflies',
+                standards: ['CSTA 2-AP-16', 'NGSS MS-PS4-3']
+            },
+            {
+                id: 'remote_control',
+                title: 'Remote Control System',
+                subtitle: '',
+                goal: 'Control one micro:bit from another',
+                concepts: ['radio', 'commands', 'conditionals'],
+                setup: ['Controller sends commands', 'Receiver executes actions'],
+                steps: [
+                    'Controller: Button A → send "forward"',
+                    'Controller: Button B → send "back"',
+                    'Controller: Tilt → send "left/right"',
+                    'Receiver: Process commands',
+                    'Receiver: Show current action'
+                ],
+                challenges: ['Add speed control', 'Emergency stop', 'Record and replay sequence'],
+                grades: [5, 6],
+                experience: ['experienced'],
+                tutorial: 'Radio',
+                standards: ['CSTA 2-AP-16', 'CSTA 2-AP-13']
+            },
+            // ADVANCED CHALLENGES (46-60)
+            {
+                id: 'state_machine',
+                title: 'Traffic Light State Machine',
+                subtitle: '',
+                goal: 'Build a traffic light with proper state transitions',
+                concepts: ['variables', 'conditionals', 'time', 'state'],
+                setup: ['Variable "state" (red/yellow/green)', 'Timer variables'],
+                steps: [
+                    'Start in RED state',
+                    'After 5 seconds → transition to GREEN',
+                    'After 5 seconds → transition to YELLOW',
+                    'After 2 seconds → back to RED',
+                    'Display current state on LEDs',
+                    'Button A → emergency stop (all red)'
+                ],
+                challenges: ['Add pedestrian crossing', '4-way intersection', 'Rush hour timing'],
+                grades: [6],
+                experience: ['experienced'],
+                tutorial: 'Variables, Time',
+                standards: ['CSTA 2-AP-13', 'CSTA 2-AP-10']
+            },
+            {
+                id: 'pathfinding',
+                title: 'LED Maze Pathfinder',
+                subtitle: '',
+                goal: 'Navigate a cursor through a maze on the LED grid',
+                concepts: ['arrays', 'coordinates', 'conditionals'],
+                setup: ['2D array for maze layout', 'Variables for player position'],
+                steps: [
+                    'Create 5x5 maze (1=wall, 0=path)',
+                    'Tilt to move cursor (check valid moves)',
+                    'Can only move through 0s',
+                    'Track moves taken',
+                    'Win when reach goal position'
+                ],
+                challenges: ['Multiple difficulty levels', 'Randomly generated mazes', 'Time challenge'],
+                grades: [6],
+                experience: ['experienced'],
+                tutorial: 'Arrays, LED',
+                standards: ['CSTA 2-AP-14', 'CSTA 2-AP-13']
+            },
+            {
+                id: 'sorting_algorithm',
+                title: 'Bubble Sort Visualizer',
+                subtitle: '',
+                goal: 'Visualize sorting algorithm on LEDs',
+                concepts: ['arrays', 'loops', 'algorithms'],
+                setup: ['Array of random numbers', 'Sorting algorithm'],
+                steps: [
+                    'Generate array of 5 random values',
+                    'Display as bar graph on LEDs',
+                    'Implement bubble sort with visualization',
+                    'Highlight elements being compared',
+                    'Show final sorted array'
+                ],
+                challenges: ['Try different sort algorithms', 'Count comparisons', 'Optimize'],
+                grades: [6],
+                experience: ['experienced'],
+                tutorial: 'Arrays, Algorithms',
+                standards: ['CSTA 2-AP-14', 'CSTA 2-AP-10', 'CSTA 2-AP-17']
+            },
+            {
+                id: 'pid_controller',
+                title: 'Temperature PID Controller',
+                subtitle: '',
+                goal: 'Maintain target temperature using feedback',
+                concepts: ['sensors', 'math', 'variables', 'algorithms'],
+                setup: ['Target temp variable', 'P, I, D coefficient variables'],
+                steps: [
+                    'Read current temperature',
+                    'Calculate error (target - current)',
+                    'Apply proportional correction',
+                    'Track integral of error over time',
+                    'Calculate derivative (rate of change)',
+                    'Output control signal strength'
+                ],
+                challenges: ['Auto-tune PID values', 'Graph response', 'Multiple targets'],
+                grades: [6],
+                experience: ['experienced'],
+                tutorial: 'Temperature, Math',
+                standards: ['NGSS MS-PS3-3', 'CSTA 2-AP-13', 'CSTA 2-AP-14']
+            },
+            {
+                id: 'multi_agent',
+                title: 'Swarm Behavior Simulation',
+                subtitle: '',
+                goal: 'Coordinate multiple micro:bits as swarm',
+                concepts: ['radio', 'algorithms', 'arrays'],
+                setup: ['Each micro:bit is autonomous agent', 'Radio for communication'],
+                steps: [
+                    'Each agent has simple rules',
+                    'Share position via radio',
+                    'Follow neighbors (alignment)',
+                    'Avoid crowding (separation)',
+                    'Move toward group center (cohesion)'
+                ],
+                challenges: ['Leader following', 'Obstacle avoidance', 'Formation flying'],
+                grades: [6],
+                experience: ['experienced'],
+                tutorial: 'Radio, Fireflies',
+                standards: ['CSTA 2-AP-16', 'CSTA 2-AP-13']
+            },
+            {
+                id: 'neural_net',
+                title: 'Simple Perceptron',
+                subtitle: '',
+                goal: 'Build a learning algorithm that improves',
+                concepts: ['arrays', 'math', 'algorithms', 'machine learning'],
+                setup: ['Arrays for weights', 'Training data array'],
+                steps: [
+                    'Create simple perceptron with 2 inputs',
+                    'Initialize random weights',
+                    'For each training example → calculate output',
+                    'Adjust weights based on error',
+                    'Repeat until accurate',
+                    'Test with new data'
+                ],
+                challenges: ['Multi-class classification', 'More inputs', 'Visualize decision boundary'],
+                grades: [6],
+                experience: ['experienced'],
+                tutorial: 'Arrays, Math',
+                standards: ['CSTA 2-AP-14', 'CSTA 2-AP-13', 'CSTA 3A-DA-09']
+            },
+            {
+                id: 'compression',
+                title: 'Run-Length Encoding',
+                subtitle: '',
+                goal: 'Compress and decompress data',
+                concepts: ['arrays', 'strings', 'loops', 'algorithms'],
+                setup: ['Array for compressed data', 'Original data array'],
+                steps: [
+                    'Take input string (e.g., "AAABBC")',
+                    'Count consecutive identical characters',
+                    'Store as count + character pairs',
+                    'Display compression ratio',
+                    'Decompress back to original'
+                ],
+                challenges: ['Compress LED patterns', 'Image compression', 'Compare methods'],
+                grades: [6],
+                experience: ['experienced'],
+                tutorial: 'Arrays, Strings',
+                standards: ['CSTA 2-AP-14', 'CSTA 2-AP-11']
+            },
+            {
+                id: 'protocol_design',
+                title: 'Custom Communication Protocol',
+                subtitle: '',
+                goal: 'Design reliable message format for radio',
+                concepts: ['radio', 'strings', 'arrays', 'protocols'],
+                setup: ['Message structure with header/payload/checksum'],
+                steps: [
+                    'Define message format (sender ID, type, data, checksum)',
+                    'Implement checksum calculation',
+                    'Send structured messages',
+                    'Receive and validate messages',
+                    'Handle corrupted messages'
+                ],
+                challenges: ['Add encryption', 'Acknowledge messages', 'Retry logic'],
+                grades: [6],
+                experience: ['experienced'],
+                tutorial: 'Radio',
+                standards: ['CSTA 2-AP-16', 'CSTA 2-AP-11', 'CSTA 2-AP-13']
+            },
+            {
+                id: 'distributed_computing',
+                title: 'Distributed Prime Finder',
+                subtitle: '',
+                goal: 'Divide computation across multiple micro:bits',
+                concepts: ['radio', 'math', 'algorithms', 'parallelism'],
+                setup: ['Coordinator assigns ranges', 'Workers process ranges'],
+                steps: [
+                    'Coordinator splits range (1-1000) among workers',
+                    'Each worker checks their range for primes',
+                    'Workers send found primes back',
+                    'Coordinator compiles complete list',
+                    'Compare parallel vs sequential time'
+                ],
+                challenges: ['Dynamic load balancing', 'Handle worker failures', 'Larger ranges'],
+                grades: [6],
+                experience: ['experienced'],
+                tutorial: 'Radio, Math',
+                standards: ['CSTA 2-AP-16', 'CSTA 2-AP-13', 'CSTA 3A-AP-17']
+            },
+            {
+                id: 'consensus',
+                title: 'Byzantine Agreement',
+                subtitle: '',
+                goal: 'Reach consensus among micro:bits with faulty nodes',
+                concepts: ['radio', 'algorithms', 'voting'],
+                setup: ['Multiple micro:bits propose values', 'Some may be faulty'],
+                steps: [
+                    'Each micro:bit proposes a value (0 or 1)',
+                    'Share proposals via radio',
+                    'Implement voting round',
+                    'Detect and exclude faulty nodes',
+                    'All correct nodes agree on same value'
+                ],
+                challenges: ['Increase fault tolerance', 'Faster convergence', 'Leader election'],
+                grades: [6],
+                experience: ['experienced'],
+                tutorial: 'Radio, Voting',
+                standards: ['CSTA 2-AP-16', 'CSTA 2-AP-13', 'CSTA 3A-AP-13']
+            },
+            {
+                id: 'gesture_recognition',
+                title: 'Custom Gesture Recognizer',
+                subtitle: '',
+                goal: 'Train micro:bit to recognize your gestures',
+                concepts: ['accelerometer', 'arrays', 'machine learning'],
+                setup: ['Arrays to store gesture patterns', 'Training mode'],
+                steps: [
+                    'Record accelerometer data during gesture',
+                    'Store pattern in array (training)',
+                    'Repeat for multiple gestures',
+                    'In recognition mode → match new gesture to stored',
+                    'Use similarity metric (correlation)',
+                    'Display recognized gesture'
+                ],
+                challenges: ['More gestures', 'Better matching algorithm', 'Real-time recognition'],
+                grades: [6],
+                experience: ['experienced'],
+                tutorial: 'Gestures, Arrays',
+                standards: ['CSTA 2-AP-14', 'CSTA 2-AP-13', 'NGSS 3-5-ETS1-3']
+            },
+            {
+                id: 'blockchain',
+                title: 'Simple Blockchain',
+                subtitle: '',
+                goal: 'Create a basic blockchain across micro:bits',
+                concepts: ['radio', 'arrays', 'cryptography', 'hash'],
+                setup: ['Array of blocks', 'Hash function', 'Radio network'],
+                steps: [
+                    'Create block structure (data, prev hash, timestamp)',
+                    'Calculate simple hash (sum of chars mod 256)',
+                    'Link blocks with previous hash',
+                    'Broadcast new blocks via radio',
+                    'Validate chain integrity',
+                    'Detect and reject invalid chains'
+                ],
+                challenges: ['Add proof of work', 'Transaction validation', 'Longest chain rule'],
+                grades: [6],
+                experience: ['experienced'],
+                tutorial: 'Radio, Arrays',
+                standards: ['CSTA 2-AP-16', 'CSTA 2-AP-11', 'CSTA 3A-NI-05']
+            },
+            {
+                id: 'kalman_filter',
+                title: 'Sensor Fusion with Kalman Filter',
+                subtitle: '',
+                goal: 'Combine multiple noisy sensors for better estimate',
+                concepts: ['sensors', 'math', 'arrays', 'algorithms'],
+                setup: ['Read from multiple sensors', 'Kalman filter variables'],
+                steps: [
+                    'Read temperature and light sensors',
+                    'Both sensors have noise',
+                    'Initialize state estimate and uncertainty',
+                    'Prediction step using motion model',
+                    'Update step using measurements',
+                    'Output filtered estimate'
+                ],
+                challenges: ['2D position tracking', 'Tune filter parameters', 'Compare filtered vs raw'],
+                grades: [6],
+                experience: ['experienced'],
+                tutorial: 'Temperature, Math',
+                standards: ['NGSS MS-PS3-3', 'CSTA 2-AP-13', 'CSTA 2-AP-14']
+            },
+            {
+                id: 'packet_routing',
+                title: 'Mesh Network Router',
+                subtitle: '',
+                goal: 'Route messages through network of micro:bits',
+                concepts: ['radio', 'arrays', 'algorithms', 'networking'],
+                setup: ['Each micro:bit knows neighbors', 'Routing table'],
+                steps: [
+                    'Build routing table via neighbor discovery',
+                    'Receive message with destination ID',
+                    'Look up next hop in routing table',
+                    'Forward message to next hop',
+                    'Track message path',
+                    'Detect and handle routing loops'
+                ],
+                challenges: ['Dynamic routing updates', 'Load balancing', 'Handle node failures'],
+                grades: [6],
+                experience: ['experienced'],
+                tutorial: 'Radio, Fireflies',
+                standards: ['CSTA 2-AP-16', 'CSTA 3A-NI-04', 'CSTA 2-AP-13']
+            },
+            {
+                id: 'epidemic_model',
+                title: 'Disease Spread Simulation',
+                subtitle: '',
+                goal: 'Model how infections spread through population',
+                concepts: ['radio', 'random', 'variables', 'modeling'],
+                setup: ['Each micro:bit is person (S/I/R state)', 'Radio for contact'],
+                steps: [
+                    'One micro:bit starts infected',
+                    'When close (radio range) → chance of transmission',
+                    'Infected for set time → becomes recovered',
+                    'Track S (susceptible), I (infected), R (recovered)',
+                    'Broadcast state changes',
+                    'Show population statistics on one micro:bit'
+                ],
+                challenges: ['Vaccination effects', 'Social distancing', 'Different diseases'],
+                grades: [6],
+                experience: ['experienced'],
+                tutorial: 'Radio, Random',
+                standards: ['NGSS MS-LS2-1', 'CSTA 2-AP-16', 'CSTA 2-AP-13']
+            }
+        ];
+        
+        // Standards database
+        const standardsDatabase = {
+            'inputs': ['CSTA 1A-AP-10', 'CSTA 1A-AP-11'],
+            'variables': ['CSTA 1A-AP-09', 'CSTA 1B-AP-09'],
+            'conditionals': ['CSTA 1B-AP-10', 'CSTA 1B-AP-12'],
+            'loops': ['CSTA 1B-AP-11', 'CSTA 1B-AP-12'],
+            'radio': ['CSTA 1B-AP-13', 'CSTA 2-AP-16', 'NGSS MS-PS4-3'],
+            'sensors': ['NGSS 3-5-ETS1-1', 'NGSS MS-PS3-3'],
+            'arrays': ['CSTA 2-AP-14'],
+            'logic': ['CSTA 1B-AP-10', 'CSTA 2-AP-13'],
+            'sequence': ['CSTA 1A-AP-11', 'CSTA 1B-AP-12']
+        };
+        
+        let generatedChallenges = [];
+        
+        function generateChallenges() {
+            try {
+                const grade = parseInt(document.getElementById('grade').value);
+                const experience = document.getElementById('experience').value;
+                const customIdea = document.getElementById('customIdea').value.trim();
+                const count = parseInt(document.getElementById('batchCount').value);
+                
+                generatedChallenges = [];
+                
+                if (customIdea) {
+                    // Generate multiple custom challenge variations based on the idea
+                    for (let i = 0; i < count; i++) {
+                        const custom = generateCustomChallenge(customIdea, grade, experience, i);
+                        generatedChallenges.push(custom);
+                    }
+                } else {
+                    // Filter challenges by grade and experience
+                    let availableChallenges = challengeLibrary.filter(c => 
+                        c.grades.includes(grade) && c.experience.includes(experience)
+                    );
+                    
+                    // Select random challenges
+                    for (let i = 0; i < count && i < availableChallenges.length; i++) {
+                        const index = Math.floor(Math.random() * availableChallenges.length);
+                        const challenge = availableChallenges[index];
+                        generatedChallenges.push(challenge);
+                        availableChallenges.splice(index, 1);
+                    }
+                }
+                
+                displayChallenges();
+            } catch (error) {
+                console.error('Error generating challenges:', error);
+                alert('Error generating challenges. Please try again or refresh the page.');
+            }
+        }
+        
+        function generateCustomChallenge(idea, grade, experience, variationIndex = 0) {
+            // Analyze the idea for key concepts
+            const lowerIdea = idea.toLowerCase();
+            
+            // Detect concepts mentioned
+            const hasArrays = lowerIdea.includes('array') || lowerIdea.includes('list');
+            const hasLoops = lowerIdea.includes('loop') || lowerIdea.includes('for') || lowerIdea.includes('repeat');
+            const hasIndex = lowerIdea.includes('index');
+            const hasVariables = lowerIdea.includes('variable');
+            const hasConditionals = lowerIdea.includes('if') || lowerIdea.includes('conditional');
+            const hasRadio = lowerIdea.includes('radio') || lowerIdea.includes('wireless') || lowerIdea.includes('communication');
+            const hasSensors = lowerIdea.includes('sensor') || lowerIdea.includes('temperature') || lowerIdea.includes('light');
+            
+            // Determine which standards apply
+            let standards = [];
+            let concepts = [];
+            let tutorial = '';
+            
+            if (hasArrays || hasIndex) {
+                standards.push('CSTA 2-AP-14');
+                concepts.push('arrays', 'index');
+                tutorial = 'Heads Up (Arrays)';
+            }
+            if (hasLoops) {
+                standards.push('CSTA 1B-AP-11', 'CSTA 1B-AP-12');
+                concepts.push('loops', 'iteration');
+                if (!tutorial) tutorial = 'Dice';
+            }
+            if (hasVariables) {
+                standards.push('CSTA 1B-AP-09');
+                concepts.push('variables');
+            }
+            if (hasConditionals) {
+                standards.push('CSTA 1B-AP-10');
+                concepts.push('conditionals');
+            }
+            if (hasRadio) {
+                standards.push('CSTA 2-AP-16');
+                concepts.push('radio');
+                tutorial = 'Fireflies (Radio)';
+            }
+            if (hasSensors) {
+                standards.push('NGSS 3-5-ETS1-1');
+                concepts.push('sensors');
+            }
+            
+            // Default standards if none detected
+            if (standards.length === 0) {
+                standards = ['CSTA 1B-AP-15', 'NGSS 3-5-ETS1-2'];
+            }
+            if (!tutorial) tutorial = 'MakeCode Tutorial';
+            
+            // Generate different variations based on variationIndex
+            const variations = [];
+            
+            if (hasArrays && hasLoops && hasIndex) {
+                variations.push({
+                    title: 'Array Explorer',
+                    goal: 'Practice arrays and for loops with index manipulation',
+                    setup: [
+                        'Create an array with 5 different icons or numbers',
+                        'Create variable "index" = 0'
+                    ],
+                    steps: [
+                        'Use a "for" loop to cycle through array indices (0 to 4)',
+                        'On button A pressed → show current array item',
+                        'On button B pressed → move to next index (use modulo to wrap)',
+                        'Display the current index number in the corner',
+                        'Add animation when cycling through items'
+                    ],
+                    challenges: [
+                        'Add more items to the array (10 items)',
+                        'Make button A+B jump to random index',
+                        'Create a second array and sync both',
+                        'Add a timer to auto-advance through array'
+                    ]
+                });
+                
+                variations.push({
+                    title: 'Sequence Shuffler',
+                    goal: 'Use loops to manipulate array order',
+                    setup: [
+                        'Create an array with numbers 1-5',
+                        'Create variable "swapCount" = 0'
+                    ],
+                    steps: [
+                        'On start → display array in order using for loop',
+                        'On shake → swap two random positions in array',
+                        'Use for loop to show the shuffled array',
+                        'Button A → sort array back to original order',
+                        'Keep track of how many swaps were made'
+                    ],
+                    challenges: [
+                        'Create a "bubble sort" visualization',
+                        'Find the median value in the array',
+                        'Reverse the array order',
+                        'Create a memory game with the array'
+                    ]
+                });
+                
+                variations.push({
+                    title: 'Pattern Generator',
+                    goal: 'Build LED patterns using arrays and loops',
+                    setup: [
+                        'Create array of LED coordinates: [[0,0], [1,0], [2,0], etc]',
+                        'Create variable "patternIndex" = 0'
+                    ],
+                    steps: [
+                        'Use nested for loops to light up LEDs from array',
+                        'Button A → advance to next pattern in sequence',
+                        'Button B → play all patterns in a loop',
+                        'Shake → create random pattern and add to array',
+                        'Show pattern number on display'
+                    ],
+                    challenges: [
+                        'Save favorite patterns permanently',
+                        'Create smooth transitions between patterns',
+                        'Let user draw patterns with tilt',
+                        'Send patterns to another micro:bit'
+                    ]
+                });
+            }
+            
+            if (hasArrays && hasLoops) {
+                variations.push({
+                    title: 'List Looper',
+                    goal: 'Use for loops to iterate through arrays',
+                    setup: [
+                        'Create an array with your favorite animals, colors, or emojis',
+                        'Use at least 5 items in your array'
+                    ],
+                    steps: [
+                        'On start → use "for element in list" loop',
+                        'Inside loop → show each item for 1 second',
+                        'After loop completes → show checkmark',
+                        'Button A restarts the loop',
+                        'Test with different array sizes'
+                    ],
+                    challenges: [
+                        'Add a pause that gets shorter each loop',
+                        'Create 2 arrays and alternate between them',
+                        'Count how many times you loop',
+                        'Make the loop go backwards'
+                    ]
+                });
+                
+                variations.push({
+                    title: 'Quiz Master',
+                    goal: 'Create a quiz game using arrays and loops',
+                    setup: [
+                        'Create array "questions" with 5 text items',
+                        'Create array "answers" with correct responses',
+                        'Create variable "score" = 0'
+                    ],
+                    steps: [
+                        'Use for loop to go through each question',
+                        'Display question on LEDs',
+                        'Button A = answer choice 1, Button B = answer choice 2',
+                        'Check answer and update score',
+                        'Show final score at end of loop'
+                    ],
+                    challenges: [
+                        'Add a timer for each question',
+                        'Give bonus points for fast answers',
+                        'Shuffle question order',
+                        'Create difficulty levels'
+                    ]
+                });
+            }
+            
+            if (hasArrays) {
+                variations.push({
+                    title: 'Array Master',
+                    goal: 'Build and manipulate arrays dynamically',
+                    setup: [
+                        'Create an empty array called "items"',
+                        'Create variable "count" = 0'
+                    ],
+                    steps: [
+                        'Button A → add a random number (1-9) to array',
+                        'Button B → show length of array',
+                        'Shake → show all items one by one',
+                        'A+B together → clear the array',
+                        'Display current array size on LEDs'
+                    ],
+                    challenges: [
+                        'Remove the last item instead of clearing all',
+                        'Find and display the largest number',
+                        'Sort the array from smallest to largest',
+                        'Check if a specific number is in the array'
+                    ]
+                });
+                
+                variations.push({
+                    title: 'Music Maker',
+                    goal: 'Store and play musical notes using arrays',
+                    setup: [
+                        'Create array "melody" (empty at start)',
+                        'Create array "notes" with frequencies [262, 294, 330, 349, 392]'
+                    ],
+                    steps: [
+                        'Button A → add random note from notes array to melody',
+                        'Button B → play entire melody array',
+                        'Shake → clear melody',
+                        'Show number of notes in melody on display',
+                        'Add pause between notes when playing'
+                    ],
+                    challenges: [
+                        'Let user choose note with tilt',
+                        'Save melodies and recall them',
+                        'Create harmony with two arrays',
+                        'Record and play back button taps'
+                    ]
+                });
+            }
+            
+            if (hasLoops) {
+                variations.push({
+                    title: 'Loop Patterns',
+                    goal: 'Master for loops and repeat blocks',
+                    setup: [
+                        'Plan a pattern you want to create',
+                        'Think about how many times to repeat'
+                    ],
+                    steps: [
+                        'Create a "for" loop that counts from 0 to 4',
+                        'Inside loop → show the counter number',
+                        'Use "repeat" block to flash an icon 3 times',
+                        'Nest loops inside each other for complex patterns',
+                        'Add pause between iterations'
+                    ],
+                    challenges: [
+                        'Create a pyramid pattern with LEDs',
+                        'Make a countdown timer using loops',
+                        'Draw shapes on the LED grid using nested loops',
+                        'Create a breathing LED animation'
+                    ]
+                });
+            }
+            
+            // If no specific variations, create a generic one
+            if (variations.length === 0) {
+                variations.push({
+                    title: 'Concept Builder',
+                    goal: idea.substring(0, 100),
+                    setup: [
+                        'Identify the main inputs you need (buttons, sensors, etc.)',
+                        'Create variables to track state',
+                        'Plan your code structure before building'
+                    ],
+                    steps: [
+                        'Start with a simple version that works',
+                        'Test each part individually',
+                        'Add complexity one feature at a time',
+                        'Use comments or labels to organize your code',
+                        'Debug by showing values on the display'
+                    ],
+                    challenges: [
+                        'Add visual feedback for each action',
+                        'Include error handling',
+                        'Make it work with multiple difficulty levels',
+                        'Add sound effects or music'
+                    ]
+                });
+            }
+            
+            // Shuffle variations array for randomness
+            for (let i = variations.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [variations[i], variations[j]] = [variations[j], variations[i]];
+            }
+            
+            // Select variation based on index (wrap around if more requested than available)
+            const selectedVariation = variations[variationIndex % variations.length];
+            
+            return {
+                id: 'custom_' + Date.now() + '_' + variationIndex,
+                title: selectedVariation.title,
+                subtitle: '',
+                goal: selectedVariation.goal,
+                concepts: concepts.length > 0 ? concepts : ['custom'],
+                setup: selectedVariation.setup,
+                steps: selectedVariation.steps,
+                challenges: selectedVariation.challenges,
+                grades: [grade],
+                experience: [experience],
+                tutorial: tutorial,
+                standards: standards
+            };
+        }
+        
+        
+        function displayChallenges() {
+            const output = document.getElementById('output');
+            output.innerHTML = '';
+            output.className = 'output-section active';
+            
+            generatedChallenges.forEach((challenge, index) => {
+                const div = document.createElement('div');
+                div.className = 'challenge-preview';
+                
+                let html = `
+                    <div class="challenge-title">${challenge.title}</div>
+                    ${challenge.subtitle ? `<div class="challenge-subtitle">${challenge.subtitle}</div>` : ''}
+                    <div class="challenge-goal">GOAL: ${challenge.goal}</div>
+                `;
+                
+                if (challenge.setup && challenge.setup.length > 0) {
+                    html += '<div class="challenge-content"><strong>Setup:</strong><ul>';
+                    challenge.setup.forEach(item => {
+                        html += `<li>${item}</li>`;
+                    });
+                    html += '</ul></div>';
+                }
+                
+                if (challenge.steps && challenge.steps.length > 0) {
+                    html += '<div class="challenge-content"><strong>Steps:</strong><ol>';
+                    challenge.steps.forEach(step => {
+                        html += `<li>${step}</li>`;
+                    });
+                    html += '</ol></div>';
+                }
+                
+                if (challenge.challenges && challenge.challenges.length > 0) {
+                    html += '<div class="challenge-content"><strong>Challenge Ideas:</strong><ul>';
+                    challenge.challenges.forEach(item => {
+                        html += `<li>${item}</li>`;
+                    });
+                    html += '</ul></div>';
+                }
+                
+                // Add standards
+                html += `<div class="challenge-standards"><strong>Standards:</strong> ${challenge.standards.join(', ')}</div>`;
+                
+                div.innerHTML = html;
+                output.appendChild(div);
+            });
+            
+            // Add download buttons
+            const downloadDiv = document.createElement('div');
+            downloadDiv.className = 'download-buttons';
+            downloadDiv.innerHTML = `
+                <button class="btn-download btn-txt" onclick="downloadTXT()">📄 Download TXT</button>
+                <button class="btn-download btn-pdf" onclick="downloadPDF('3x5')">📋 Download PDF (3x5)</button>
+                <button class="btn-download btn-pdf" onclick="downloadPDF('4x6')">📋 Download PDF (4x6)</button>
+                <button class="btn-download btn-slides" onclick="downloadSlides()">📊 Download Google Slides</button>
+                <button class="btn-download btn-tutorial" onclick="copyPrompt()">📋 Copy Your Prompt</button>
+            `;
+            output.appendChild(downloadDiv);
+            
+            // Add helpful tip
+            const tipDiv = document.createElement('div');
+            tipDiv.style.cssText = 'text-align: center; margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 8px; color: #856404;';
+            tipDiv.innerHTML = `
+                <strong>💡 Not satisfied?</strong> Click "Copy Your Prompt" to save your settings, 
+                then click "Start Fresh" and paste your prompt back in to try again with new variations.
+            `;
+            output.appendChild(tipDiv);
+        }
+        
+        function downloadTXT() {
+            let content = 'micro:bit Challenges\n';
+            content += '='.repeat(50) + '\n\n';
+            
+            generatedChallenges.forEach((challenge, index) => {
+                content += `Challenge ${index + 1}: ${challenge.title}\n`;
+                if (challenge.subtitle) content += `${challenge.subtitle}\n`;
+                content += '\n';
+                content += `GOAL: ${challenge.goal}\n\n`;
+                
+                if (challenge.setup && challenge.setup.length > 0) {
+                    content += 'Setup:\n';
+                    challenge.setup.forEach(item => content += `  • ${item}\n`);
+                    content += '\n';
+                }
+                
+                if (challenge.steps && challenge.steps.length > 0) {
+                    content += 'Steps:\n';
+                    challenge.steps.forEach((step, i) => content += `  ${i + 1}. ${step}\n`);
+                    content += '\n';
+                }
+                
+                if (challenge.challenges && challenge.challenges.length > 0) {
+                    content += 'Challenge Ideas:\n';
+                    challenge.challenges.forEach(item => content += `  • ${item}\n`);
+                    content += '\n';
+                }
+                
+                content += `Standards: ${challenge.standards.join(', ')}\n`;
+                content += '\n' + '-'.repeat(50) + '\n\n';
+            });
+            
+            downloadFile('microbit_challenges.txt', content);
+        }
+        
+        function downloadPDF(size) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({
+                orientation: 'portrait',
+                unit: 'in',
+                format: size === '3x5' ? [3, 5] : [4, 6]
+            });
+            
+            const margin = 0.2;
+            const width = size === '3x5' ? 3 : 4;
+            const height = size === '3x5' ? 5 : 6;
+            const contentWidth = width - (margin * 2);
+            
+            generatedChallenges.forEach((challenge, index) => {
+                if (index > 0) doc.addPage();
+                
+                let y = margin;
+                
+                // Title
+                doc.setFontSize(size === '3x5' ? 14 : 16);
+                doc.setFont(undefined, 'bold');
+                const titleLines = doc.splitTextToSize(challenge.title, contentWidth);
+                doc.text(titleLines, margin, y);
+                y += titleLines.length * 0.2;
+                
+                // Subtitle
+                if (challenge.subtitle) {
+                    doc.setFontSize(size === '3x5' ? 10 : 12);
+                    doc.setFont(undefined, 'normal');
+                    const subLines = doc.splitTextToSize(challenge.subtitle, contentWidth);
+                    doc.text(subLines, margin, y);
+                    y += subLines.length * 0.15 + 0.1;
+                }
+                
+                // Goal
+                doc.setFontSize(size === '3x5' ? 10 : 11);
+                doc.setFont(undefined, 'bold');
+                doc.text('GOAL: ', margin, y);
+                doc.setFont(undefined, 'normal');
+                const goalLines = doc.splitTextToSize(challenge.goal, contentWidth - 0.5);
+                doc.text(goalLines, margin + 0.5, y);
+                y += goalLines.length * 0.15 + 0.15;
+                
+                // Content
+                doc.setFontSize(size === '3x5' ? 8 : 9);
+                
+                if (challenge.setup && challenge.setup.length > 0 && y < height - 0.5) {
+                    doc.setFont(undefined, 'bold');
+                    doc.text('Setup:', margin, y);
+                    y += 0.12;
+                    doc.setFont(undefined, 'normal');
+                    challenge.setup.forEach(item => {
+                        if (y < height - 0.3) {
+                            const lines = doc.splitTextToSize('• ' + item, contentWidth - 0.1);
+                            doc.text(lines, margin + 0.1, y);
+                            y += lines.length * 0.12;
+                        }
+                    });
+                    y += 0.1;
+                }
+                
+                if (challenge.steps && challenge.steps.length > 0 && y < height - 0.5) {
+                    doc.setFont(undefined, 'bold');
+                    doc.text('Steps:', margin, y);
+                    y += 0.12;
+                    doc.setFont(undefined, 'normal');
+                    challenge.steps.forEach((step, i) => {
+                        if (y < height - 0.3) {
+                            const lines = doc.splitTextToSize(`${i + 1}. ${step}`, contentWidth - 0.1);
+                            doc.text(lines, margin + 0.1, y);
+                            y += lines.length * 0.12;
+                        }
+                    });
+                }
+                
+                // Standards at bottom
+                if (y < height - 0.4) {
+                    doc.setFontSize(7);
+                    doc.setFont(undefined, 'italic');
+                    const standardsText = challenge.standards.join(', ');
+                    const stdLines = doc.splitTextToSize(standardsText, contentWidth);
+                    doc.text(stdLines, margin, height - margin - (stdLines.length * 0.1));
+                }
+            });
+            
+            doc.save(`microbit_challenges_${size}.pdf`);
+        }
+        
+        function downloadSlides() {
+            alert('Google Slides export coming soon! For now, please use PDF export and import to Google Slides.');
+        }
+        
+        function generateTutorialReference() {
+            let csv = 'Challenge,MakeCode Tutorial,Concepts,Standards\n';
+            
+            challengeLibrary.forEach(challenge => {
+                csv += `"${challenge.title}","${challenge.tutorial}","${challenge.concepts.join(', ')}","${challenge.standards.join(', ')}"\n`;
+            });
+            
+            downloadFile('microbit_tutorial_reference.csv', csv);
+        }
+        
+        function downloadFile(filename, content) {
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        function refreshPage() {
+            if (confirm('This will clear your current work and start fresh. Continue?')) {
+                location.reload();
+            }
+        }
+        
+        function copyPrompt() {
+            const grade = document.getElementById('grade').value;
+            const experience = document.getElementById('experience').value;
+            const customIdea = document.getElementById('customIdea').value.trim();
+            const count = document.getElementById('batchCount').value;
+            
+            let promptText = `Grade: ${grade}\nExperience: ${experience}\nNumber of Challenges: ${count}`;
+            if (customIdea) {
+                promptText += `\n\nCustom Idea:\n${customIdea}`;
+            }
+            
+            // Copy to clipboard
+            navigator.clipboard.writeText(customIdea || '').then(() => {
+                alert('✅ Your custom idea has been copied!\n\nNow:\n1. Click "Start Fresh" button\n2. Paste your idea back in (Ctrl+V or Cmd+V)\n3. Click "Generate Challenges" for new variations');
+            }).catch(() => {
+                alert('Could not copy automatically. Here are your settings:\n\n' + promptText);
+            });
+        }
+    </script>
+</body>
+</html>
