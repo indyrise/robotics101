@@ -1,44 +1,95 @@
-# robotics101
+# Robotics 101
 
-Classroom resources for introductory robotics with the Acebott ESP32 Car Shield.
+Classroom resources for introductory robotics education using the Acebott ESP32 Car Shield.
 
-## Repository layout
+This repository contains libraries, tools, and projects designed to support hands-on learning in middle and high school robotics courses.
+
+## 📚 Repository Contents
+
+### [Arduino Diagnostic Test](./Arduino%20Diagnostic%20Test)
+
+An interactive web-based practice exam designed to help students prepare for the official [Arduino Fundamentals Certification](https://www.arduino.cc/education/certification).
+
+**Features:**
+- 36 multiple-choice questions covering 8 Arduino topics
+- 75-minute countdown timer matching real exam format
+- Free navigation between questions
+- Instant feedback and scoring
+- Built with React + Vite
+
+📖 **[View Documentation →](./Arduino%20Diagnostic%20Test/README.md)**
+
+---
+
+### [Acebott ESP32 Car Shield Library](./arduino/libraries/Acebott)
+
+A custom Arduino library for the Acebott ESP32 four-wheel mecanum car kit, rebuilt to work seamlessly with Arduino Cloud.
+
+**What's Fixed:**
+- Added `Motor.h` abstraction for compatibility
+- Replaced unavailable SR04.h dependency with bundled ultrasonic.h
+- Corrected header-casing mismatches for Linux build agents
+- Single zip import for classroom reliability
+
+**Use Cases:**
+- Arduino Cloud projects with Acebott hardware
+- Local Arduino IDE development
+- Classroom robotics projects requiring reliable library imports
+
+📖 **[View Documentation →](./arduino/libraries/Acebott/README.md)**
+
+---
+
+## 🎯 Educational Context
+
+These resources are designed for **Robotics 101** courses teaching:
+- Arduino programming fundamentals
+- Embedded systems with ESP32
+- Mecanum wheel robotics
+- Sensor integration (ultrasonic, motors, servos)
+- Arduino Certification preparation
+
+## 🚀 Quick Start
+
+### For Students
+1. **Practicing for Arduino Certification?** → Check out the [Arduino Diagnostic Test](./Arduino%20Diagnostic%20Test/README.md)
+2. **Building with Acebott Car Shield?** → Install the [Acebott Library](./arduino/libraries/Acebott/README.md)
+
+### For Educators
+- Each project includes detailed README files with setup instructions
+- Tools are designed for classroom deployment and reliability
+- All resources support both individual and collaborative learning
+
+## 📂 Repository Structure
 
 ```
-arduino/
-  libraries/
-    Acebott/          # Custom library – Arduino Cloud compatible
+robotics101/
+├── Arduino Diagnostic Test/     # Practice exam for Arduino certification
+│   ├── tools/
+│   │   └── arduino-diagnostic/  # React web application
+│   ├── README.md               # Full documentation
+│   └── SETUP_INSTRUCTIONS.md   # Deployment guide
+│
+└── arduino/
+    └── libraries/
+        └── Acebott/             # Custom Arduino library
+            ├── src/             # Library source code
+            ├── examples/        # Example sketches
+            └── README.md        # Library documentation
 ```
 
-## Acebott ESP32 Car Shield library
+## 🤝 Contributing
 
-`arduino/libraries/Acebott/` contains a custom Arduino library for the
-Acebott ESP32 four-wheel mecanum car kit. It is intended to be imported as a
-custom library in **Arduino Cloud** (or used locally with the Arduino IDE).
+This is an educational project developed for classroom use. If you find bugs, have suggestions, or want to contribute improvements:
 
-### Why this library exists
+1. Check existing issues
+2. Open a new issue describing your suggestion
+3. For code contributions, submit a pull request
 
-The vendor-supplied Acebott library cannot be used directly in Arduino Cloud
-because of several packaging and cross-platform issues:
+## 📝 License
 
-1. **Missing `Motor.h` abstraction** – example sketches `#include <Motor.h>`,
-   but the original library did not ship that header. This library adds a thin
-   `Motor` wrapper that delegates to the existing `Vehicle` driver.
-2. **`SR04.h` dependency unavailable in Arduino Cloud** – the original
-   ultrasonic examples pulled in a third-party `SR04.h` header that is not
-   available as a Cloud library. The fixed examples use the bundled
-   `ultrasonic.h` instead.
-3. **Header-casing mismatches** – filenames like `vehicle.h` vs `Vehicle.h`
-   compiled fine on case-insensitive macOS/Windows but broke on the Linux
-   build agents used by Arduino Cloud. All `#include` directives now match
-   the actual filenames.
-4. **Classroom reliability** – students need a single zip import that "just
-   works." This library is that single import.
+Developed for educational use in Robotics 101 courses.
 
-### How to use in Arduino Cloud
+---
 
-1. Download or zip the `arduino/libraries/Acebott/` folder.
-2. In Arduino Cloud, go to **Libraries → Custom → Import**.
-3. Upload the zip. The library will appear as **acebott**.
-4. In your sketch, `#include <Motor.h>` (or any other header listed in
-   `library.properties`).
+**Questions?** Open an issue or reach out to the course instructors.
