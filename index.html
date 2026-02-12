@@ -1,54 +1,261 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Robotics 101 | Rucha Gokhale</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <title>Robotics 101 | Classroom Tools</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Free, classroom-ready robotics and coding tools for grades 4–8." />
   <style>
+    :root {
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --text: #1f2430;
+      --muted: #5b667a;
+      --line: rgba(0,0,0,0.08);
+      --btn: #2d6cdf;
+      --btn2: #3b3f4a;
+      --shadow: 0 10px 24px rgba(0,0,0,0.08);
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; }
     body {
-      font-family: Arial, sans-serif;
       margin: 0;
-      padding: 40px 20px;
-      background-color: #f4f6f8;
-      color: #222;
-      text-align: center;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .wrap {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 40px 18px 70px 18px;
+    }
+    header {
+      text-align: left;
+      margin-bottom: 26px;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 12px;
+      letter-spacing: 0.02em;
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      background: rgba(255,255,255,0.6);
+      margin-bottom: 14px;
     }
     h1 {
-      margin-bottom: 10px;
+      margin: 0 0 8px 0;
+      font-size: 34px;
+      line-height: 1.2;
     }
-    p {
-      max-width: 600px;
-      margin: 0 auto 40px auto;
-      line-height: 1.6;
+    .sub {
+      margin: 0;
+      max-width: 780px;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 16px;
+      margin-top: 22px;
     }
     .card {
-      background: white;
-      max-width: 600px;
-      margin: 20px auto;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      grid-column: span 12;
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px 18px 16px 18px;
+      border: 1px solid rgba(0,0,0,0.04);
     }
+    @media (min-width: 860px) {
+      .card { grid-column: span 6; }
+    }
+
     .card h2 {
-      margin-top: 0;
+      margin: 0 0 8px 0;
+      font-size: 18px;
     }
-    .button {
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 10px 0 12px 0;
+    }
+    .pill {
+      font-size: 12px;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #fff;
+    }
+    .desc {
+      margin: 0 0 14px 0;
+      color: var(--text);
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .btn {
       display: inline-block;
-      margin: 8px;
-      padding: 10px 18px;
-      background-color: #2d6cdf;
-      color: white;
       text-decoration: none;
-      border-radius: 6px;
+      padding: 10px 14px;
+      border-radius: 10px;
       font-size: 14px;
+      border: 1px solid transparent;
+      background: var(--btn);
+      color: #fff;
     }
-    .button.secondary {
-      background-color: #555;
+    .btn.secondary {
+      background: transparent;
+      border-color: var(--line);
+      color: var(--text);
     }
+    .btn.tertiary {
+      background: var(--btn2);
+      color: #fff;
+    }
+
+    .section {
+      margin-top: 28px;
+      background: rgba(255,255,255,0.65);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      color: var(--muted);
+    }
+    .section h3 {
+      margin: 0 0 8px 0;
+      color: var(--text);
+      font-size: 15px;
+    }
+    .small {
+      font-size: 13px;
+      margin: 0;
+    }
+    footer {
+      margin-top: 28px;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: space-between;
+      align-items: center;
+    }
+    footer a {
+      color: var(--muted);
+      text-decoration: none;
+      border-bottom: 1px dotted rgba(0,0,0,0.25);
+    }
+    footer a:hover { color: var(--text); }
   </style>
 </head>
-<body>
 
-  <h1>Robotics 101</h1>
-  <p>
-    A growing collection of AI
+<body>
+  <div class="wrap">
+    <header>
+      <div class="badge">Classroom-ready tools</div>
+      <h1>Robotics 101 Classroom Tools</h1>
+      <p class="sub">
+        Free, ready-to-use activities for grades 4 to 8. Most tools work directly in your browser.
+        Pick one, click “Start,” and you are moving.
+      </p>
+    </header>
+
+    <div class="grid">
+      <div class="card">
+        <h2>Microbit Challenge Generator</h2>
+        <p class="desc">
+          Generate quick coding challenges you can run as bell work, centers, or fast-finish tasks.
+        </p>
+        <div class="meta">
+          <span class="pill">Grades: 4 to 6</span>
+          <span class="pill">Time: 10 to 20 minutes</span>
+          <span class="pill">Setup: none</span>
+        </div>
+        <div class="actions">
+          <a class="btn" href="PASTE_LIVE_TOOL_LINK_HERE" target="_blank" rel="noopener">Start the Tool</a>
+          <a class="btn secondary" href="PASTE_TEACHER_GUIDE_LINK_HERE" target="_blank" rel="noopener">Teacher Guide</a>
+          <a class="btn tertiary" href="https://github.com/indyrise/robotics101/tree/main/microbit%20challenge%20app" target="_blank" rel="noopener">For Builders</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Arduino Diagnostic App</h2>
+        <p class="desc">
+          A quick self-check to help students (and teachers) see what they know before starting a unit.
+        </p>
+        <div class="meta">
+          <span class="pill">Grades: 6 to 8</span>
+          <span class="pill">Time: 10 to 15 minutes</span>
+          <span class="pill">Setup: browser</span>
+        </div>
+        <div class="actions">
+          <a class="btn" href="PASTE_LIVE_TOOL_LINK_HERE" target="_blank" rel="noopener">Start the Tool</a>
+          <a class="btn secondary" href="PASTE_TEACHER_GUIDE_LINK_HERE" target="_blank" rel="noopener">Teacher Guide</a>
+          <a class="btn tertiary" href="PASTE_GITHUB_FOLDER_LINK_HERE" target="_blank" rel="noopener">For Builders</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Mecanum Wheel Lessons</h2>
+        <p class="desc">
+          A step-by-step lesson sequence to get a basic mecanum vehicle moving and then iterating on control.
+        </p>
+        <div class="meta">
+          <span class="pill">Grades: 6 to 8</span>
+          <span class="pill">Time: 1 to 2 class periods</span>
+          <span class="pill">Setup: kit required</span>
+        </div>
+        <div class="actions">
+          <a class="btn" href="PASTE_RESOURCE_OR_PDF_LINK_HERE" target="_blank" rel="noopener">Open the Lesson</a>
+          <a class="btn secondary" href="PASTE_TEACHER_GUIDE_LINK_HERE" target="_blank" rel="noopener">Teacher Guide</a>
+          <a class="btn tertiary" href="PASTE_GITHUB_FOLDER_LINK_HERE" target="_blank" rel="noopener">For Builders</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Air Quality Monitor Project</h2>
+        <p class="desc">
+          A project scaffold for building a simple sensor-based monitor and learning how measurement can drift.
+        </p>
+        <div class="meta">
+          <span class="pill">Grades: 6 to 8</span>
+          <span class="pill">Time: 2 to 4 class periods</span>
+          <span class="pill">Setup: parts required</span>
+        </div>
+        <div class="actions">
+          <a class="btn" href="PASTE_PROJECT_PAGE_OR_DOC_LINK_HERE" target="_blank" rel="noopener">Open the Project</a>
+          <a class="btn secondary" href="PASTE_TEACHER_GUIDE_LINK_HERE" target="_blank" rel="noopener">Teacher Guide</a>
+          <a class="btn tertiary" href="PASTE_GITHUB_FOLDER_LINK_HERE" target="_blank" rel="noopener">For Builders</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Quick note for teachers</h3>
+      <p class="small">
+        If something asks you to “view code,” you can ignore it. Use the “Start” and “Teacher Guide” buttons.
+        If you ever want a printable version, I can add PDFs for each tool.
+      </p>
+    </div>
+
+    <footer>
+      <div>Built by Rucha Gokhale</div>
+      <div>
+        <a href="https://github.com/indyrise/robotics101" target="_blank" rel="noopener">View the full Robotics 101 repo</a>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>
