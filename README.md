@@ -40,6 +40,25 @@ A custom Arduino library for the Acebott ESP32 four-wheel mecanum car kit, rebui
 
 ---
 
+### [Python Escape Room Series](./python/escape-room)
+
+Gamified Jupyter notebook challenges that reinforce foundational Python concepts through structured problem-solving.
+
+**Features:**
+- Story-driven rooms
+- Validation “check” cells that unlock progress
+- Optional hint scaffolding
+- Designed for Google Colab classroom deployment
+
+Use Cases:
+- Middle school Python instruction
+- After-school coding cohorts
+- Concept reinforcement through gameplay
+
+📖 **[View Documentation →](./python/escape-room/README.md)**
+
+---
+
 ## 🎯 Educational Context
 
 These resources are designed for **Robotics 101** courses teaching:
@@ -48,17 +67,21 @@ These resources are designed for **Robotics 101** courses teaching:
 - Mecanum wheel robotics
 - Sensor integration (ultrasonic, motors, servos)
 - Arduino Certification preparation
+- Introductory Python programming (variables, conditionals, loops, lists, dictionaries)
+- Gamified reinforcement through notebook-based escape challenges
 
 ## 🚀 Quick Start
 
 ### For Students
 1. **Practicing for Arduino Certification?** → Check out the [Arduino Diagnostic Test](./Arduino%20Diagnostic%20Test/README.md)
 2. **Building with Acebott Car Shield?** → Install the [Acebott Library](./arduino/libraries/Acebott/README.md)
+3. **Learning Python fundamentals?** → Explore the [Python Escape Room Series](./python/escape-room)
 
 ### For Educators
-- Each project includes detailed README files with setup instructions
-- Tools are designed for classroom deployment and reliability
-- All resources support both individual and collaborative learning
+- Each project includes detailed README files with setup instructions  
+- Escape room notebooks are designed for Colab distribution (share link → students make a copy → run cells)  
+- Tools are built for classroom reliability and repeatable deployment  
+- Supports both independent and pair programming models  
 
 ## 📂 Repository Structure
 
@@ -76,6 +99,10 @@ robotics101/
             ├── src/             # Library source code
             ├── examples/        # Example sketches
             └── README.md        # Library documentation
+├── python/
+│   └── escape-room/             # Gamified Python notebook challenges
+│       ├── README.md
+│       └── *.ipynb              # Escape room notebooks
 ```
 
 ## 🤝 Contributing
