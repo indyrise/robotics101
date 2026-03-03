@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Escape Room Builder</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,600;0,900;1,300&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--ink:#0f0e0d;--paper:#f5f0e8;--cream:#ede7d9;--rust:#c94a2a;--gold:#c9962a;--teal:#2a6b6b;--dim:#b0a898;--mono:'DM Mono',monospace;--serif:'Fraunces',Georgia,serif}
+html{background:var(--paper);color:var(--ink);font-family:var(--mono);font-size:14px}
+body{min-height:100vh;display:grid;grid-template-columns:370px 1fr;grid-template-rows:auto 1fr}
+header{grid-column:1/-1;padding:24px 36px;border-bottom:2px solid var(--ink);display:flex;align-items:baseline;gap:16px;background:var(--ink);color:var(--paper)}
+header h1{font-family:var(--serif);font-weight:900;font-size:1.8rem;letter-spacing:-.02em}
+header h1 span{color:var(--gold)}
+header p{font-size:.72rem;opacity:.55;letter-spacing:.1em;text-transform:uppercase}
+aside{border-right:2px solid var(--ink);padding:28px 24px;display:flex;flex-direction:column;gap:24px;background:var(--cream);overflow-y:auto}
+.fg{display:flex;flex-direction:column;gap:7px}
+label.fl{font-size:.68rem;text-transform:uppercase;letter-spacing:.12em;font-weight:500;color:var(--teal)}
+select,input[type=number]{appearance:none;background:var(--paper);border:2px solid var(--ink);padding:9px 12px;font-family:var(--mono);font-size:.82rem;color:var(--ink);width:100%;outline:none;cursor:pointer;transition:border-color .15s}
+select:focus,input[type=number]:focus{border-color:var(--teal)}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7'%3E%3Cpath d='M0 0l5 7 5-7z' fill='%230f0e0d'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+.tsrow{display:none}.tsrow.on{display:flex;flex-direction:column;gap:7px}
+hr.div{border:none;border-top:1px solid var(--dim)}
+.th{display:flex;justify-content:space-between;align-items:center}
+.th label.fl{margin:0}
+.ta{display:flex;gap:8px}
+.lb{background:none;border:none;font-family:var(--mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;cursor:pointer;color:var(--teal);text-decoration:underline;padding:0}
+.lb:hover{color:var(--rust)}
+.tgrid{display:flex;flex-direction:column;gap:5px}
+.tc{display:flex;align-items:center;gap:9px;padding:9px 11px;border:2px solid transparent;cursor:pointer;transition:all .12s;background:var(--paper);user-select:none}
+.tc:hover{border-color:var(--teal)}
+.tc.sel{border-color:var(--ink);background:var(--ink);color:var(--paper)}
+.tc.dis{opacity:.3;cursor:not-allowed;pointer-events:none}
+.tc input{display:none}
+.ti{font-size:1rem;width:20px;text-align:center;flex-shrink:0}
+.tn{font-size:.8rem;font-weight:500}
+.tt{font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;opacity:.55}
+.tc.sel .tt{opacity:.65}
+.tord{width:17px;height:17px;border-radius:50%;background:var(--gold);color:var(--ink);font-size:.62rem;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.gbtn{background:var(--rust);color:var(--paper);border:2px solid var(--rust);padding:13px 18px;font-family:var(--serif);font-size:1rem;font-weight:600;font-style:italic;cursor:pointer;width:100%;transition:all .15s}
+.gbtn:hover{background:var(--ink);border-color:var(--ink)}
+.gbtn:disabled{background:var(--dim);border-color:var(--dim);cursor:not-allowed}
+.vm{font-size:.7rem;color:var(--rust);min-height:15px;text-align:center;letter-spacing:.04em}
+main{padding:28px 36px;overflow-y:auto;display:flex;flex-direction:column;gap:20px}
+.ph{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--dim);padding-bottom:14px}
+.ph h2{font-family:var(--serif);font-weight:600;font-size:1.05rem;font-style:italic}
+.badge{font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;padding:4px 9px;border:1px solid var(--dim);color:var(--dim)}
+.nbp{display:flex;flex-direction:column;gap:8px}
+.nbc{border-left:3px solid var(--dim);padding:11px 14px;font-size:.76rem;line-height:1.6;background:var(--paper);animation:si .18s ease both}
+.nbc.mdc{border-color:var(--teal)}
+.nbc.cdc{border-color:var(--gold);font-family:var(--mono);background:var(--cream)}
+.nbc.chc{border-color:var(--rust);font-family:var(--mono);background:#faf5f0}
+.nbl{font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;opacity:.5;margin-bottom:5px}
+.nbl.md{color:var(--teal)}.nbl.cd{color:var(--gold)}.nbl.ch{color:var(--rust)}
+.nbc h3{font-family:var(--serif);font-size:.95rem;font-weight:600;margin-bottom:3px}
+.nbc pre{font-size:.73rem;line-height:1.5;white-space:pre-wrap;color:#3d3528}
+.lsep{display:flex;align-items:center;gap:8px;color:var(--dim);font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;margin:2px 0}
+.lsep::before,.lsep::after{content:'';flex:1;height:1px;background:var(--dim)}
+.chain{display:flex;align-items:center;flex-wrap:wrap;gap:0;row-gap:6px;padding:12px 0}
+.cs{display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 14px;border:2px solid var(--ink);background:var(--paper);min-width:72px}
+.cs .sl{font-family:var(--serif);font-weight:900;font-size:1.2rem;color:var(--rust)}
+.cs .st{font-size:.58rem;text-transform:uppercase;letter-spacing:.07em;text-align:center;color:var(--teal)}
+.cs .sc{font-family:var(--mono);font-size:.65rem;color:var(--gold);letter-spacing:.1em}
+.ca{padding:0 5px;font-size:1rem;color:var(--dim)}
+.dls{border:2px solid var(--teal);padding:18px;display:none;flex-direction:column;gap:12px;animation:si .2s ease}
+.dls.on{display:flex}
+.dls h3{font-family:var(--serif);font-weight:600;font-style:italic;font-size:.95rem;color:var(--teal)}
+.dlf{display:flex;flex-direction:column;gap:6px}
+.dlr{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--cream);border:1px solid var(--dim)}
+.dlr .fn{font-family:var(--mono);font-size:.75rem}
+.dlb{background:var(--teal);color:var(--paper);border:none;padding:5px 12px;font-family:var(--mono);font-size:.68rem;cursor:pointer;text-transform:uppercase;letter-spacing:.07em;text-decoration:none;display:inline-block}
+.dlb:hover{background:var(--ink)}
+.es{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--dim);text-align:center;padding:50px 20px}
+.es .ei{font-size:2.8rem}
+.es p{font-size:.78rem;line-height:1.6;max-width:260px}
+@keyframes si{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:720px){body{grid-template-columns:1fr}aside{border-right:none;border-bottom:2px solid var(--ink)}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Escape Room <span>Builder</span></h1>
+  <p>Python · Google Colab · Grades 3–11</p>
+</header>
+<aside>
+  <div class="fg"><label class="fl" for="grade">Grade</label>
+    <select id="grade">
+      <option value="">— select grade —</option>
+      <option value="3">Grade 3 (Primary)</option><option value="4">Grade 4 (Primary)</option><option value="5">Grade 5 (Primary)</option>
+      <option value="6">Grade 6 (Middle)</option><option value="7">Grade 7 (Middle)</option><option value="8">Grade 8 (Middle)</option>
+      <option value="9">Grade 9 (High)</option><option value="10">Grade 10 (High)</option><option value="11">Grade 11 (High)</option>
+    </select>
+  </div>
+  <div class="fg"><label class="fl" for="skill">Skill Level</label>
+    <select id="skill">
+      <option value="">— select level —</option>
+      <option value="beginner">Beginner</option>
+      <option value="intermediate">Intermediate</option>
+    </select>
+  </div>
+  <div class="fg"><label class="fl" for="fmt">Format</label>
+    <select id="fmt">
+      <option value="">— select format —</option>
+      <option value="solo">Solo (one student)</option>
+      <option value="team">Team Chain (multiple students)</option>
+    </select>
+  </div>
+  <div class="fg tsrow" id="tsrow"><label class="fl" for="tsz">Students per Team</label>
+    <input type="number" id="tsz" min="2" max="8" value="3">
+  </div>
+  <hr class="div">
+  <div class="fg">
+    <div class="th"><label class="fl">Topics (select &amp; reorder)</label>
+      <div class="ta">
+        <button class="lb" onclick="suggest()">Suggest</button>
+        <button class="lb" onclick="clearT()">Clear</button>
+      </div>
+    </div>
+    <div class="tgrid" id="tgrid"></div>
+  </div>
+  <hr class="div">
+  <p class="vm" id="vm"></p>
+  <button class="gbtn" id="gbtn" onclick="generate()">Generate Escape Room</button>
+</aside>
+<main id="main">
+  <div class="es" id="es"><div class="ei">🔐</div><p>Configure your escape room on the left, then click Generate to preview and download.</p></div>
+</main>
+<script>
+const TOPICS=[
+  {id:"variables",     name:"Variables & Print",   icon:"📦",tag:"S1", groups:["primary","middle"],        skills:["beginner"]},
+  {id:"input_types",   name:"Input & Data Types",  icon:"⌨️", tag:"S2", groups:["primary","middle"],        skills:["beginner"]},
+  {id:"conditionals",  name:"Conditionals",         icon:"🔀",tag:"S3", groups:["primary","middle","high"], skills:["beginner","intermediate"]},
+  {id:"for_loops",     name:"For Loops",            icon:"🔁",tag:"S4", groups:["primary","middle","high"], skills:["beginner","intermediate"]},
+  {id:"while_loops",   name:"While Loops",          icon:"🔄",tag:"S5", groups:["middle","high"],           skills:["beginner","intermediate"]},
+  {id:"error_handling",name:"Error Handling",       icon:"🛡️", tag:"S5", groups:["middle","high"],           skills:["intermediate"]},
+  {id:"lists",         name:"Lists",                icon:"📋",tag:"S6", groups:["middle","high"],           skills:["beginner","intermediate"]},
+  {id:"tuples",        name:"Tuples",               icon:"🔒",tag:"S6", groups:["middle","high"],           skills:["intermediate"]},
+  {id:"lists_deep",    name:"Lists Deep Dive",      icon:"🔍",tag:"S7", groups:["middle","high"],           skills:["intermediate"]},
+  {id:"dictionaries",  name:"Dictionaries",         icon:"📖",tag:"S8", groups:["middle","high"],           skills:["intermediate"]},
+  {id:"string_methods",name:"String Methods",       icon:"🔤",tag:"S9", groups:["high"],                   skills:["intermediate"]},
+  {id:"functions",     name:"Functions",            icon:"⚙️", tag:"S10",groups:["middle","high"],           skills:["intermediate"]},
+  {id:"random_lib",    name:"Random Library",       icon:"🎲",tag:"S11",groups:["middle","high"],           skills:["intermediate"]},
+];
+const SUGGESTED={
+  primary_beginner:    ["variables","input_types","conditionals","for_loops"],
+  primary_intermediate:["conditionals","for_loops","lists"],
+  middle_beginner:     ["conditionals","for_loops","while_loops","lists"],
+  middle_intermediate: ["for_loops","lists","dictionaries","functions"],
+  high_beginner:       ["conditionals","for_loops","while_loops","lists"],
+  high_intermediate:   ["functions","dictionaries","string_methods","while_loops"],
+};
+const LOCKS={
+  variables:{title:"Lock — Store the Clue",
+    inst:{primary:"Assign a short string to `clue1`, `clue2`, `clue3`. Print all three.",middle:"Store `location`, `suspect`, `time` as non-empty strings. Print an f-string summary.",high:"Store `location`, `suspect`, `time`. Print an f-string summary and the `type()` of each."},
+    start:{primary:'clue1 = ""\nclue2 = ""\nclue3 = ""\n# TODO: assign values then print each\nprint(clue1)\nprint(clue2)\nprint(clue3)',middle:'location = ""\nsuspect  = ""\ntime     = ""\n# TODO: assign values\nprint(f"Suspect: {suspect}, Location: {location}, Time: {time}")',high:'location = ""\nsuspect  = ""\ntime     = ""\n# TODO: assign values then print types too\nprint(f"Suspect: {suspect}")\nprint(type(location))'},
+    chk:{primary:'assert isinstance(clue1,str) and len(clue1)>0,"clue1 must be a non-empty string"\nassert isinstance(clue2,str) and len(clue2)>0,"clue2 must be a non-empty string"\nassert isinstance(clue3,str) and len(clue3)>0,"clue3 must be a non-empty string"',middle:'assert isinstance(location,str) and len(location)>0,"location must be non-empty"\nassert isinstance(suspect,str) and len(suspect)>0,"suspect must be non-empty"\nassert isinstance(time,str) and len(time)>0,"time must be non-empty"',high:'assert isinstance(location,str) and len(location)>0,"location must be non-empty"\nassert isinstance(suspect,str) and len(suspect)>0,"suspect must be non-empty"'}},
+  input_types:{title:"Lock — Read the Transmission",
+    inst:{primary:"Ask for the agent's name with `input()`. Store in `agent_name`. Print a greeting.",middle:"Use `int(input(...))` to get `agent_id`. If > 100 set `clearance='high'`, else `'standard'`.",high:"Use `int(input(...))` for `agent_id`. Wrap in try/except — if invalid set `agent_id = -1`."},
+    start:{primary:'agent_name = input("Enter your agent name: ")\n# TODO: print a greeting using agent_name\nprint(f"Welcome, Agent {agent_name}.")',middle:'agent_id  = int(input("Agent number: "))\nclearance = ""\n# TODO: if/else to set clearance\nprint(f"Agent {agent_id} — clearance: {clearance}")',high:'try:\n    agent_id = int(input("Agent number: "))\nexcept ValueError:\n    agent_id = -1\n    print("Invalid — defaulting to -1")\nprint(f"ID: {agent_id}")'},
+    chk:{primary:'assert isinstance(agent_name,str) and len(agent_name)>0,"agent_name must be non-empty"',middle:'assert clearance in ("high","standard"),"clearance must be high or standard"\nassert (agent_id>100 and clearance=="high") or (agent_id<=100 and clearance=="standard"),"Check condition"',high:'assert isinstance(agent_id,int),"agent_id must be an integer"'}},
+  conditionals:{title:"Lock — The Access Gate",
+    inst:{primary:"Set `access_level` to any integer. If > 5 set `door='open'`, else `door='locked'`.",middle:"Set `access_level`. if >= 8 → `clearance='high'`, 4–7 → `'medium'`, below 4 → `'low'`.",high:"Set `access_level` (int) and `has_badge` (bool). `clearance='granted'` only if level>=7 AND badge=True. Otherwise `'denied'`."},
+    start:{primary:'access_level = 0\ndoor = ""\n# TODO: if/else\nprint(f"Door: {door}")',middle:'access_level = 0\nclearance = ""\n# TODO: if/elif/else\nprint(f"Clearance: {clearance}")',high:'access_level = 0\nhas_badge = False\nclearance = ""\n# TODO: combined condition\nprint(f"Access: {clearance}")'},
+    chk:{primary:'assert door in ("open","locked"),"door must be open or locked"\nassert (access_level>5 and door=="open") or (access_level<=5 and door=="locked"),"Check condition"',middle:'assert clearance in ("high","medium","low"),"must be high/medium/low"\nassert (access_level>=8 and clearance=="high") or (4<=access_level<=7 and clearance=="medium") or (access_level<4 and clearance=="low"),"Check elif chain"',high:'assert clearance in ("granted","denied"),"must be granted or denied"\nassert (access_level>=7 and has_badge and clearance=="granted") or (not(access_level>=7 and has_badge) and clearance=="denied"),"Check combined condition"'}},
+  for_loops:{title:"Lock — Scan the Cargo",
+    inst:{primary:"Loop through `cargo`. Print each item. Count in `total_items`.",middle:"Loop through `cargo`. Count items containing `'classified'` in `classified_count`.",high:"Use `enumerate()` on `cargo`. Build `manifest` — strings like `'Item 1: food supplies'` (1-indexed)."},
+    start:{primary:'cargo = ["food supplies","medical kits","classified documents","tools"]\ntotal_items = 0\nfor item in cargo:\n    print("")  # replace with variable\n    total_items += 1\nprint(f"Total: {total_items}")',middle:'cargo = ["food supplies","classified files","medical kits","classified data","tools"]\nclassified_count = 0\nfor item in cargo:\n    if "" in item:  # what word to check?\n        classified_count += 1\nprint(f"Classified: {classified_count}")',high:'cargo = ["food supplies","classified files","medical kits","tools","comms device"]\nmanifest = []\nfor i, item in enumerate(cargo):\n    manifest.append("")  # build string here\nprint(manifest)'},
+    chk:{primary:'assert total_items==4,f"Expected 4, got {total_items}"',middle:'assert classified_count==2,f"Expected 2, got {classified_count}"',high:'assert len(manifest)==5\nassert manifest[0]=="Item 1: food supplies",f"Got: {manifest[0]}"'}},
+  while_loops:{title:"Lock — Crack the Combination",
+    inst:{middle:"Set `attempts=0`, `cracked=False`. While attempts<5 and not cracked: increment. Set cracked=True when attempts==3.",high:"Start `counter=1`, `steps=0`. While counter<=100: double counter, increment steps. How many doublings?"},
+    start:{middle:'attempts=0\ncracked=False\nwhile attempts<5 and not cracked:\n    attempts+=1\n    if attempts==3:\n        cracked=True\nprint(f"Cracked: {cracked}, Attempts: {attempts}")',high:'counter=1\nsteps=0\nwhile counter<=100:\n    counter=counter*2\n    steps+=1\nprint(f"Counter: {counter}, Steps: {steps}")'},
+    chk:{middle:'assert cracked==True,"cracked should be True"\nassert attempts==3,f"Expected 3, got {attempts}"',high:'assert counter>100,f"Should exceed 100"\nassert steps==7,f"Expected 7 steps, got {steps}"'}},
+  error_handling:{title:"Lock — Handle the Fault",
+    inst:{middle:"Wrap `int(input(...))` in try/except. Catch ValueError, set `safe_value=0`. Otherwise set `safe_value` to the entered number.",high:"Write `safe_divide(a,b)` — returns a/b normally, returns None and prints message if b==0."},
+    start:{middle:'safe_value=0\ntry:\n    safe_value=int(input("Enter a number: "))\nexcept ValueError:\n    safe_value=0\n    print("Not a number — using 0")\nprint(f"Safe value: {safe_value}")',high:'def safe_divide(a,b):\n    try:\n        return a/b\n    except ZeroDivisionError:\n        print("Cannot divide by zero")\n        return None\nprint(safe_divide(10,2))\nprint(safe_divide(5,0))'},
+    chk:{middle:'assert isinstance(safe_value,int),"safe_value must be an integer"',high:'assert safe_divide(10,2)==5.0,"10/2 should be 5.0"\nassert safe_divide(5,0) is None,"Division by zero should return None"'}},
+  lists:{title:"Lock — Inventory Check",
+    inst:{middle:"Add `'grappling hook'` to `equipment`. Remove `'broken radio'`. Store final length in `item_count`.",high:"Sort `equipment` into `sorted_gear`. Use list comprehension for `long_items` — items with >10 chars."},
+    start:{middle:'equipment=["torch","broken radio","rope","first aid kit"]\nequipment.append("")  # add grappling hook\nequipment.remove("")  # remove broken radio\nitem_count=len(equipment)\nprint(f"Equipment: {equipment}")\nprint(f"Count: {item_count}")',high:'equipment=["torch","rope","first aid kit","grappling hook","compass"]\nsorted_gear=sorted(equipment)\nlong_items=[item for item in equipment if len(item)>10]\nprint(f"Sorted: {sorted_gear}")\nprint(f"Long: {long_items}")'},
+    chk:{middle:'assert "grappling hook" in equipment,"grappling hook missing"\nassert "broken radio" not in equipment,"broken radio should be removed"\nassert item_count==4,f"Expected 4, got {item_count}"',high:'assert sorted_gear==sorted(["torch","rope","first aid kit","grappling hook","compass"]),"check sort order"\nassert "first aid kit" in long_items,"first aid kit should be in long_items"'}},
+  tuples:{title:"Lock — Locked Coordinates",
+    inst:{middle:"Create `coords=(x,y)` with two integers. Print x via index 0, y via index 1.",high:"Create `waypoints` tuple with ≥4 (x,y) pairs. Loop with enumerate and print each step (1-indexed)."},
+    start:{middle:'coords=(0,0)  # TODO: set real values\nx_val=coords[0]\ny_val=coords[1]\nprint(f"X: {x_val}, Y: {y_val}")',high:'waypoints=()  # TODO: add at least 4 (x,y) pairs\nfor i,pt in enumerate(waypoints):\n    print(f"Step {i+1}: {pt}")'},
+    chk:{middle:'assert isinstance(coords,tuple),"coords must be a tuple"\nassert len(coords)==2,"coords must have 2 values"\nassert all(isinstance(v,int) for v in coords),"both values must be integers"',high:'assert isinstance(waypoints,tuple),"must be a tuple"\nassert len(waypoints)>=4,"need at least 4 waypoints"'}},
+  lists_deep:{title:"Lock — Score the Operatives",
+    inst:{middle:"Use `enumerate()` on `scores`. Print `'Test 1: 85'` etc. Add a warning for scores below 80.",high:"Use `enumerate()` on `scores`. Build `passing` (>=80) and `failing` (<80). Calculate average of passing."},
+    start:{middle:'scores=[85,92,78,90,74,95]\nfor i,score in enumerate(scores):\n    print(f"Test {i+1}: {score}")\n    if score<80:\n        print(f"  Warning: low score on test {i+1}")',high:'scores=[85,92,78,90,74,95,88]\npassing=[s for s in scores if s>=80]\nfailing=[s for s in scores if s<80]\naverage=sum(passing)/len(passing)\nprint(f"Passing: {passing}")\nprint(f"Failing: {failing}")\nprint(f"Average: {average:.1f}")'},
+    chk:{middle:'assert True,"No assert — check your output looks right"',high:'assert len(passing)+len(failing)==len(scores),"all scores must be in one list"\nassert all(s>=80 for s in passing),"all passing scores must be >=80"\nassert round(average,1)==round(sum([s for s in scores if s>=80])/len([s for s in scores if s>=80]),1)'}},
+  dictionaries:{title:"Lock — Agent Profiles",
+    inst:{middle:"Add `'status':'active'` to `agent`. Look up `'codename'` and store in `codename`.",high:"Loop through `agents`. Build `active_agents` dict: codename→clearance, active agents only."},
+    start:{middle:'agent={"codename":"Nighthawk","clearance":8,"location":"Berlin"}\nagent["status"]="active"\ncodename=agent[""]  # replace with correct key\nprint(agent)\nprint(f"Codename: {codename}")',high:'agents=[\n    {"codename":"Nighthawk","clearance":8,"status":"active"},\n    {"codename":"Phantom","clearance":5,"status":"inactive"},\n    {"codename":"Cipher","clearance":9,"status":"active"},\n]\nactive_agents={}\nfor agent in agents:\n    if agent["status"]=="active":\n        active_agents[agent["codename"]]=agent["clearance"]\nprint(active_agents)'},
+    chk:{middle:'assert agent.get("status")=="active","status should be active"\nassert codename=="Nighthawk",f"Got {codename}"',high:'assert "Nighthawk" in active_agents,"Nighthawk missing"\nassert "Phantom" not in active_agents,"Phantom is inactive"\nassert active_agents.get("Cipher")==9,"Cipher clearance should be 9"'}},
+  string_methods:{title:"Lock — Parse the Transmission",
+    inst:{high:"Split `transmission` on `','`, strip whitespace from each part, join with `' | '` into `clean_signal`."},
+    start:{high:'transmission="ALPHA ,  BRAVO , CHARLIE,  DELTA "\nparts=transmission.split(",")\nparts=[p.strip() for p in parts]\nclean_signal=" | ".join(parts)\nprint(f"Parts: {parts}")\nprint(f"Clean: {clean_signal}")'},
+    chk:{high:'assert parts==["ALPHA","BRAVO","CHARLIE","DELTA"],f"Got {parts}"\nassert clean_signal=="ALPHA | BRAVO | CHARLIE | DELTA",f"Got {clean_signal}"'}},
+  functions:{title:"Lock — Decode the Signal",
+    inst:{middle:"Write `decode(message)` that returns `message` reversed. Call on `encrypted`, store in `decoded`.",high:"Write `caesar_shift(text, shift)` shifting every letter forward by `shift` (wrapping z→a). Non-letters unchanged."},
+    start:{middle:'encrypted="noissiM tpeccA uoY dluohS"\ndef decode(message):\n    return message[::-1]\ndecoded=decode(encrypted)\nprint(f"Decoded: {decoded}")',high:'def caesar_shift(text,shift):\n    result=""\n    for char in text:\n        if char.isalpha():\n            base=ord("a") if char.islower() else ord("A")\n            result+=chr((ord(char)-base+shift)%26+base)\n        else:\n            result+=char\n    return result\nprint(caesar_shift("abc",1))\nprint(caesar_shift("xyz",3))'},
+    chk:{middle:'assert callable(decode),"decode must be a function"\nassert decoded=="Should You Accept Mission",f"Got: {decoded}"',high:"assert caesar_shift('abc',1)=='bcd',f\"Expected bcd\"\nassert caesar_shift('xyz',3)=='abc',f\"Expected abc\""}},
+  random_lib:{title:"Lock — Roll the Cipher",
+    inst:{middle:"Import `random`. Use `random.choice()` on `code_words` → `selected`. Use `random.randint(100,999)` → `pin`.",high:"Write `generate_passphrase(words,n)` returning n randomly chosen words joined by `'-'`. Test it."},
+    start:{middle:'import random\ncode_words=["ALPHA","BRAVO","CIPHER","DELTA","ECHO"]\nselected=random.choice(code_words)\npin=random.randint(100,999)\nprint(f"Code: {selected}-{pin}")',high:'import random\ndef generate_passphrase(words,n):\n    return "-".join(random.choices(words,k=n))\nword_bank=["ghost","cipher","delta","night","shadow","vault"]\npassphrase=generate_passphrase(word_bank,3)\nprint(f"Passphrase: {passphrase}")'},
+    chk:{middle:'assert isinstance(selected,str) and selected in code_words,"selected must be from code_words"\nassert isinstance(pin,int) and 100<=pin<=999,"pin must be 100-999"',high:'assert callable(generate_passphrase)\nresult=generate_passphrase(["a","b","c"],3)\nassert isinstance(result,str)\nassert len(result.split("-"))==3,"must have 3 words"'}},
+};
+const SCENARIOS={
+  primary:["You are a junior coder at **Cipher HQ**. The database has been locked by a rogue program. Solve each puzzle to recover a fragment of the override password!","A data thief has frozen the school's robot fleet. Each robot is locked behind a code. Unlock them one by one!"],
+  middle:["You are a field operative. Your handler has gone dark. Crack each security lock using your training dossier.","The **Data Vault** was sealed after a breach. Work through each layer to recover the mission files."],
+  high:["A hostile actor encrypted the agency's network. Reverse-engineer each layer to recover the master decryption key.","You are a systems analyst. An unknown process locked production. Solve each diagnostic challenge to neutralise it."],
+};
+const BONUS={
+  primary:"Can you print your variables in reverse order using `reversed()`?",
+  middle:"Wrap your main logic in `try/except` so undefined variables print a friendly message instead of crashing.",
+  high:"Write `validate_all(checks) -> bool` returning True only if every item is True. Test with two cases.",
+};
+
+let sel=[];
+function grp(g){return g<=5?"primary":g<=8?"middle":"high"}
+function pick(o,g){return o[g]||o["middle"]||o["primary"]||Object.values(o)[0]}
+function code(n=5){const c="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";return Array.from({length:n},()=>c[Math.floor(Math.random()*c.length)]).join("")}
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+
+function renderT(){
+  const g=parseInt(document.getElementById("grade").value)||0;
+  const sk=document.getElementById("skill").value;
+  const group=g?grp(g):null;
+  const grid=document.getElementById("tgrid");
+  grid.innerHTML="";
+  TOPICS.forEach(t=>{
+    const ok=group?t.groups.includes(group)&&(!sk||t.skills.includes(sk)):true;
+    const s=sel.includes(t.id);
+    const ord=s?sel.indexOf(t.id)+1:null;
+    const el=document.createElement("label");
+    el.className="tc"+(s?" sel":"")+((!ok)?" dis":"");
+    el.dataset.id=t.id;
+    el.innerHTML=`<input type="checkbox"${s?" checked":""}${!ok?" disabled":""}><span class="ti">${t.icon}</span><span style="flex:1"><span class="tn">${t.name}</span><br><span class="tt">Session ${t.tag}</span></span>${s?`<span class="tord">${ord}</span>`:""}`;
+    el.addEventListener("click",e=>{e.preventDefault();if(!ok)return;toggleT(t.id)});
+    grid.appendChild(el);
+  });
+}
+function toggleT(id){sel.includes(id)?sel=sel.filter(x=>x!==id):sel.push(id);renderT();preview()}
+function clearT(){sel=[];renderT();preview()}
+function suggest(){
+  const g=parseInt(document.getElementById("grade").value);
+  const sk=document.getElementById("skill").value;
+  if(!g||!sk){document.getElementById("vm").textContent="Select grade and skill first.";return}
+  const key=grp(g)+"_"+sk;
+  sel=[...(SUGGESTED[key]||[])];renderT();preview();
+}
+document.getElementById("fmt").addEventListener("change",function(){
+  document.getElementById("tsrow").classList.toggle("on",this.value==="team");preview();
+});
+["grade","skill","tsz"].forEach(id=>document.getElementById(id).addEventListener("change",()=>{renderT();preview()}));
+document.getElementById("tsz").addEventListener("input",preview);
+
+function preview(){
+  const g=parseInt(document.getElementById("grade").value)||0;
+  const sk=document.getElementById("skill").value;
+  const fmt=document.getElementById("fmt").value;
+  const main=document.getElementById("main");
+  main.innerHTML="";
+  if(!g||!sk||!fmt||sel.length===0){
+    main.innerHTML='<div class="es"><div class="ei">🔐</div><p>Select grade, skill, format and at least one topic to see a preview.</p></div>';return;
+  }
+  const group=grp(g);
+  const tsz=parseInt(document.getElementById("tsz").value)||3;
+  const ph=document.createElement("div");ph.className="ph";
+  ph.innerHTML=`<h2>${fmt==="solo"?"Solo Escape Room":`Team Chain — ${tsz} notebooks`}</h2><span class="badge">Grade ${g} · ${sk} · ${sel.length} lock${sel.length!==1?"s":""}</span>`;
+  main.appendChild(ph);
+  if(fmt==="team"){
+    const chain=document.createElement("div");chain.className="chain";
+    Array.from({length:tsz},(_,i)=>{
+      const tid=sel[i%sel.length];const t=TOPICS.find(x=>x.id===tid);
+      const cs=document.createElement("div");cs.className="cs";
+      cs.innerHTML=`<span class="sl">${String.fromCharCode(65+i)}</span><span class="st">${t?.name||"—"}</span><span class="sc">${code()}</span>`;
+      chain.appendChild(cs);
+      if(i<tsz-1){const a=document.createElement("span");a.className="ca";a.textContent="→";chain.appendChild(a);}
+    });
+    main.appendChild(chain);
+  }
+  const nb=document.createElement("div");nb.className="nbp";
+  nb.appendChild(mkCell("cd","Setup","_frags = []\nprint('🚀 Ready.')"));
+  sel.forEach((id,i)=>{
+    const L=LOCKS[id];if(!L)return;
+    const inst=pick(L.inst,group);const start=pick(L.start,group);const f=code();
+    const sep=document.createElement("div");sep.className="lsep";sep.textContent=`Lock ${i+1} of ${sel.length}`;nb.appendChild(sep);
+    nb.appendChild(mkCell("md",L.title,`**${id.replace(/_/g," ")}** | ${inst}`));
+    nb.appendChild(mkCell("cd","Student work",start));
+    nb.appendChild(mkCell("ch","Check cell",`# assert check → fragment: ${f}`));
+  });
+  const pw=sel.map(()=>code()).join("-");
+  nb.appendChild(mkCell("md","🏁 Final Lock","All fragments collected? Run the cell below."));
+  nb.appendChild(mkCell("cd","Final check",`if len(_frags)==${sel.length}:\n    print("🎉 PASSWORD: ${pw}")`));
+  main.appendChild(nb);
+}
+
+function mkCell(type,title,content){
+  const c=document.createElement("div");
+  c.className="nbc "+(type==="md"?"mdc":type==="cd"?"cdc":"chc");
+  const lt=type==="md"?"md":type==="cd"?"cd":"ch";
+  const ln=type==="md"?"Markdown":type==="cd"?"Code":"Check";
+  c.innerHTML=`<div class="nbl ${lt}">${ln}</div>`+(type==="md"?`<h3>${title}</h3><p>${content.replace(/\*\*(.*?)\*\*/g,"<strong>$1</strong>").replace(/`(.*?)`/g,"<code>$1</code>")}</p>`:`<pre>${esc(content)}</pre>`);
+  return c;
+}
+
+function validate(){
+  const g=parseInt(document.getElementById("grade").value);
+  const sk=document.getElementById("skill").value;
+  const fmt=document.getElementById("fmt").value;
+  const vm=document.getElementById("vm");
+  if(!g){vm.textContent="Select a grade.";return false}
+  if(!sk){vm.textContent="Select a skill level.";return false}
+  if(!fmt){vm.textContent="Select a format.";return false}
+  if(sel.length===0){vm.textContent="Select at least one topic.";return false}
+  vm.textContent="";return true;
+}
+
+function generate(){
+  if(!validate())return;
+  const g=parseInt(document.getElementById("grade").value);
+  const sk=document.getElementById("skill").value;
+  const fmt=document.getElementById("fmt").value;
+  const tsz=parseInt(document.getElementById("tsz").value)||3;
+  const group=grp(g);
+  const scenario=SCENARIOS[group][Math.floor(Math.random()*2)];
+  const files=[];
+  const frags=Array.from({length:fmt==="team"?tsz:sel.length},()=>code());
+
+  if(fmt==="solo"){
+    files.push({name:`escape_room_grade${g}_${sk}_solo.ipynb`,nb:buildSolo(g,sk,group,scenario,sel,frags)});
+  } else {
+    const assigned=Array.from({length:tsz},(_,i)=>sel[i%sel.length]);
+    for(let i=0;i<tsz;i++){
+      const lbl=String.fromCharCode(65+i);
+      files.push({name:`escape_room_grade${g}_${sk}_team_student${lbl}.ipynb`,nb:buildTeam(g,sk,group,scenario,assigned[i],i,tsz,frags)});
+    }
+  }
+  showDL(files);
+}
+
+function nbShell(cells){return{nbformat:4,nbformat_minor:5,metadata:{kernelspec:{display_name:"Python 3",language:"python",name:"python3"},language_info:{name:"python",version:"3.10.0"},colab:{provenance:[]}},cells}}
+function nbMd(s){return{cell_type:"markdown",metadata:{},source:s}}
+function nbCd(s){return{cell_type:"code",execution_count:null,metadata:{},outputs:[],source:s}}
+function pv(o,g){return o[g]||o["middle"]||o["primary"]||Object.values(o)[0]}
+
+function introC(title,group,sk,scenario,teamNote){
+  let b=`# 🔐 ${title}\n\n**Group:** ${group[0].toUpperCase()+group.slice(1)} | **Skill:** ${sk[0].toUpperCase()+sk.slice(1)}\n\n---\n\n## The Scenario\n\n${scenario}`;
+  if(teamNote)b+=`\n\n---\n\n${teamNote}`;
+  b+=`\n\n---\n\n## How It Works\n\n- Each lock: **instructions → your code → check cell**\n- Correct code reveals a **fragment**\n- Collect all fragments to assemble the **final password**\n\n**Rules:** write your own code · use index cards for syntax · ask a classmate before the teacher`;
+  return[nbMd(b),nbCd("# Run this first\n_frags = []\nprint('🚀 Escape room ready.')")];
+}
+
+function lockC(tid,group,frag,num,total){
+  const L=LOCKS[tid];
+  const inst=pv(L.inst,group);const start=pv(L.start,group);const chk=pv(L.chk,group);
+  const ind=chk.split("\n").map(l=>"    "+l).join("\n");
+  const chkSrc=`# Check cell — do not edit\n_frags = globals().get('_frags',[])\ntry:\n${ind}\n    _frags.append("${frag}")\n    print(f"✅  Lock ${num} open! Fragment: ${frag}")\nexcept AssertionError as e:\n    print(f"❌  Not yet — {e}")\nexcept Exception as e:\n    print(f"⚠️  Error — {e}")`;
+  return[nbMd(`## 🔒 ${L.title}\n\n**Concept:** ${tid.replace(/_/g," ")} | Lock ${num} of ${total}\n\n${inst}\n\n---`),nbCd(`# Your code here\n\n${start}`),nbCd(chkSrc)];
+}
+
+function finalC(frags,group){
+  const n=frags.length;const pw=frags.join("-");
+  return[nbMd("## 🏁 Final Lock\n\nAll fragments collected? Run the cell below."),nbCd(`_frags=globals().get('_frags',[])\nif len(_frags)==${n}:\n    print(f"🎉 PASSWORD UNLOCKED: ${pw}")\nelse:\n    print(f"🔒 {'{'}len(_frags){'}'} /${n} fragments. Keep going.")`),nbMd(`## ⭐ Bonus — Optional\n\n${BONUS[group]}\n\n*Does not affect your password.*`),nbCd("# Your bonus code here\n")];
+}
+
+function buildSolo(g,sk,group,scenario,topicIds,frags){
+  const cells=introC(`Escape Room — Grade ${g} (${sk[0].toUpperCase()+sk.slice(1)})`,group,sk,scenario,"");
+  topicIds.forEach((id,i)=>cells.push(...lockC(id,group,frags[i],i+1,topicIds.length)));
+  cells.push(...finalC(frags,group));
+  return nbShell(cells);
+}
+
+function buildTeam(g,sk,group,scenario,tid,idx,tsz,frags){
+  const lbl=String.fromCharCode(65+idx);
+  const prev=idx>0?String.fromCharCode(65+idx-1):null;
+  const next=idx<tsz-1?String.fromCharCode(65+idx+1):null;
+  const prevF=idx>0?frags[idx-1]:null;
+  let note=`## 🔗 Team Chain — Student ${lbl} of ${tsz}\n\n`;
+  note+=idx===0?`You are **first**. No entry code needed. Solve your lock then pass your fragment to **Student ${next}**.`:idx===tsz-1?`⚠️ Wait for **Student ${prev}'s fragment** before starting.\n\nYou are **last**. Assemble the final password.`:`⚠️ Wait for **Student ${prev}'s fragment** before starting.\n\nOnce done, pass your fragment to **Student ${next}**.`;
+  const cells=introC(`Escape Room — Grade ${g} (${sk[0].toUpperCase()+sk.slice(1)}) — Student ${lbl}`,group,sk,scenario,note);
+  const gate=idx===0?`# No entry code needed\n_frags=[]\nprint("🚀 Chain started.")`:`entry_code=input("Entry code from Student ${prev}: ")\nif entry_code.strip().upper()=="${prevF}":\n    _frags=[]\n    print("✅ Accepted.")\nelse:\n    print("❌ Wrong code.")`;
+  cells.push(nbCd(gate));
+  cells.push(...lockC(tid,group,frags[idx],1,1));
+  if(idx<tsz-1){cells.push(nbMd(`## 🔁 Hand Off\n\nLock open? Pass your fragment to **Student ${next}**. Don't share early.`));}
+  else{cells.push(...finalC(frags,group));cells.push(nbMd("## 🏆 Chain Complete!\n\nRaise your hand — your team has escaped!"));}
+  return nbShell(cells);
+}
+
+function showDL(files){
+  const main=document.getElementById("main");
+  let dl=main.querySelector(".dls");
+  if(!dl){dl=document.createElement("div");dl.className="dls";main.insertBefore(dl,main.firstChild);}
+  dl.innerHTML=`<h3>✅ ${files.length} file${files.length!==1?"s":""} ready to download</h3><div class="dlf"></div>`;
+  dl.classList.add("on");
+  const dlf=dl.querySelector(".dlf");
+  files.forEach(({name,nb})=>{
+    const blob=new Blob([JSON.stringify(nb,null,2)],{type:"application/json"});
+    const url=URL.createObjectURL(blob);
+    const row=document.createElement("div");row.className="dlr";
+    row.innerHTML=`<span class="fn">${name}</span><a class="dlb" href="${url}" download="${name}">↓ Download</a>`;
+    dlf.appendChild(row);
+  });
+}
+
+renderT();
+</script>
+</body>
+</html>
