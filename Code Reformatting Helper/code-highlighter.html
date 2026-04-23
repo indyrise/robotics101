@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Code Highlighter for Handouts</title>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f8f9fa;
+      padding: 24px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    header {
+      background: white;
+      padding: 24px;
+      border-radius: 6px;
+      margin-bottom: 24px;
+      display: flex;
+      gap: 24px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    
+    .control-group {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    
+    label {
+      font-weight: 500;
+      font-size: 14px;
+    }
+    
+    select {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    
+    #printBtn {
+      background: #2563eb;
+      color: white;
+      margin-left: auto;
+    }
+    
+    #printBtn:hover {
+      background: #1d4ed8;
+    }
+    
+    .editor-section {
+      background: white;
+      padding: 24px;
+      border-radius: 6px;
+      margin-bottom: 24px;
+    }
+    
+    .editor-label {
+      display: block;
+      margin-bottom: 12px;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    
+    textarea {
+      width: 100%;
+      height: 200px;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: Consolas, monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      resize: vertical;
+    }
+    
+    .button-group {
+      margin-top: 16px;
+    }
+    
+    #generateBtn {
+      background: #059669;
+      color: white;
+    }
+    
+    #generateBtn:hover {
+      background: #047857;
+    }
+    
+    .preview-section {
+      background: white;
+      padding: 24px;
+      border-radius: 6px;
+      margin-bottom: 40px;
+    }
+    
+    .preview-label {
+      margin-bottom: 16px;
+      font-size: 12px;
+      color: #666;
+      font-weight: 500;
+    }
+    
+    pre {
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      padding: 16px;
+      overflow-x: auto;
+      margin: 0;
+    }
+    
+    code {
+      font-family: Consolas, monospace;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+      }
+      
+      header {
+        display: none;
+      }
+      
+      .editor-section {
+        display: none;
+      }
+      
+      .preview-label {
+        display: none;
+      }
+      
+      .preview-section {
+        margin: 0;
+        padding: 0;
+        background: white;
+      }
+      
+      pre {
+        border: none;
+        padding: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="control-group">
+        <label for="language">Language:</label>
+        <select id="language">
+          <option value="cpp">C++ (Arduino)</option>
+          <option value="python">Python</option>
+          <option value="javascript">JavaScript</option>
+          <option value="html">HTML</option>
+          <option value="css">CSS</option>
+        </select>
+      </div>
+      <button id="printBtn">🖨️ Print / Save as PDF</button>
+    </header>
+
+    <div class="editor-section">
+      <label class="editor-label">Paste your code:</label>
+      <textarea id="codeInput" placeholder="Paste your code here...">const int tiltPin = 6;
+const int actionPin = 13;
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(tiltPin, INPUT);
+  pinMode(actionPin, OUTPUT);
+}</textarea>
+      <div class="button-group">
+        <button id="generateBtn">Generate Preview</button>
+      </div>
+    </div>
+
+    <div class="preview-section">
+      <p class="preview-label">PRINT PREVIEW (Cmd/Ctrl+P to print or save as PDF)</p>
+      <pre id="previewBlock"><code id="codeBlock"></code></pre>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script>
+    const codeInput = document.getElementById('codeInput');
+    const codeBlock = document.getElementById('codeBlock');
+    const languageSelect = document.getElementById('language');
+    const generateBtn = document.getElementById('generateBtn');
+    const printBtn = document.getElementById('printBtn');
+
+    function generatePreview() {
+      const code = codeInput.value;
+      const language = languageSelect.value;
+      
+      try {
+        const highlighted = hljs.highlight(code, { language: language, ignoreIllegals: true });
+        const lines = highlighted.value.split('\n');
+        const numberedLines = lines.map((line, i) => {
+          return `<div style="display: flex; line-height: 1.6;"><span style="color: #999; font-size: 11px; padding-right: 24px; min-width: 30px; text-align: right; flex-shrink: 0;">${i + 1}</span><span style="flex: 1;">${line || ' '}</span></div>`;
+        }).join('');
+        codeBlock.innerHTML = numberedLines;
+      } catch (e) {
+        console.error('Error:', e);
+        codeBlock.innerHTML = code;
+      }
+    }
+
+    generateBtn.addEventListener('click', generatePreview);
+    printBtn.addEventListener('click', () => window.print());
+    languageSelect.addEventListener('change', generatePreview);
+  </script>
+</body>
+</html>
