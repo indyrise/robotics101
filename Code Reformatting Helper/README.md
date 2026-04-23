@@ -39,3 +39,28 @@ The challenge was getting highlight.js to work with line numbers without losing 
 - Pure HTML/CSS/JavaScript
 - Highlight.js loaded via CDN
 - Works in any modern browser
+
+## Alternative Tools
+
+If you want to explore other syntax highlighting options, here are some open-source tools with live demos:
+
+### Browser-Based (No Installation)
+
+- **[Highlight.js](https://highlightjs.org/)** — What this tool uses. 190+ languages, multiple themes. Live demo on their site.
+- **[Prism.js](https://prismjs.com/)** — Lightweight, modular. Built-in line numbers. Good for minimal setups.
+- **[Shiki](https://shiki.matsu.io/)** — Modern syntax highlighter used by VS Code. Clean output, many themes.
+- **[Carbon](https://carbon.now.sh/)** — Beautiful code screenshots. Dark theme, but hard to print (that's why we built this).
+- **[Codepen](https://codepen.io/)** — Full IDE, overkill for just highlighting but good for interactive demos.
+
+### Command-Line Tools
+
+- **[Pygments](https://pygments.org/)** — Python-based. Generate HTML/PDF with custom styling. Powerful but requires setup.
+- **[Bat](https://github.com/sharkdp/bat)** — Modern `cat` replacement with syntax highlighting. Great for terminal work.
+
+### Why I Built This Instead
+
+Most tools prioritize aesthetics (dark themes, screenshots) over printability. This tool prioritizes:
+- White background for printing
+- Line numbers for student reference
+- Syntax colors that are visible on paper
+- Zero setup (just open the HTML file)
