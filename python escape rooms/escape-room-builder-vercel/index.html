@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Escape Room Builder</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,900;1,9..144,300&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--ink:#0f0e0d;--paper:#f5f0e8;--cream:#ede7d9;--rust:#c94a2a;--gold:#c9962a;--teal:#2a6b6b;--dim:#b0a898;--green:#2a6b3a;--mono:'DM Mono',monospace;--serif:'Fraunces',Georgia,serif}
+html{background:var(--paper);color:var(--ink);font-family:var(--mono);font-size:14px}
+body{min-height:100vh;display:grid;grid-template-columns:370px 1fr;grid-template-rows:auto 1fr}
+header{grid-column:1/-1;padding:20px 34px;border-bottom:2px solid var(--ink);display:flex;align-items:center;justify-content:space-between;background:var(--ink);color:var(--paper)}
+.hl{display:flex;align-items:baseline;gap:12px}
+header h1{font-family:var(--serif);font-weight:900;font-size:1.65rem;letter-spacing:-.02em}
+header h1 span{color:var(--gold)}
+header p{font-size:.66rem;opacity:.5;letter-spacing:.1em;text-transform:uppercase}
+aside{border-right:2px solid var(--ink);padding:24px 20px;display:flex;flex-direction:column;gap:18px;background:var(--cream);overflow-y:auto}
+.fg{display:flex;flex-direction:column;gap:6px}
+label.fl{font-size:.65rem;text-transform:uppercase;letter-spacing:.12em;font-weight:500;color:var(--teal)}
+select,input[type=number],input[type=password],input[type=text]{appearance:none;background:var(--paper);border:2px solid var(--ink);padding:8px 11px;font-family:var(--mono);font-size:.8rem;color:var(--ink);width:100%;outline:none;cursor:pointer;transition:border-color .15s}
+select:focus,input:focus{border-color:var(--teal)}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7'%3E%3Cpath d='M0 0l5 7 5-7z' fill='%230f0e0d'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+/* Mode toggle */
+.mode-toggle{display:flex;border:2px solid var(--ink);overflow:hidden}
+.mode-btn{flex:1;padding:9px 6px;font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;cursor:pointer;border:none;background:var(--paper);color:var(--ink);transition:all .15s;text-align:center}
+.mode-btn.active{background:var(--ink);color:var(--paper)}
+.mode-btn:not(.active):hover{background:var(--cream)}
+/* Mode panels */
+.mode-panel{display:none}.mode-panel.on{display:flex;flex-direction:column;gap:14px}
+.api-box{background:var(--paper);border:2px solid var(--gold);padding:12px;display:flex;flex-direction:column;gap:8px}
+.api-box label.fl{color:var(--gold)}
+.key-row{display:flex;gap:5px}
+.key-row input{flex:1}
+.toggle-key{background:none;border:2px solid var(--dim);padding:0 9px;font-family:var(--mono);font-size:.7rem;cursor:pointer;color:var(--dim);white-space:nowrap}
+.toggle-key:hover{border-color:var(--teal);color:var(--teal)}
+.api-hint{font-size:.65rem;color:var(--dim);line-height:1.5}
+.api-hint a{color:var(--teal)}
+.caveat{background:#faf5f0;border:2px solid var(--rust);padding:12px;font-size:.7rem;line-height:1.6;color:#5a3020}
+.caveat strong{color:var(--rust);display:block;margin-bottom:4px}
+.tsrow{display:none}.tsrow.on{display:flex;flex-direction:column;gap:6px}
+hr.div{border:none;border-top:1px solid var(--dim)}
+.th{display:flex;justify-content:space-between;align-items:center}
+.th label.fl{margin:0}
+.ta{display:flex;gap:8px}
+.lb{background:none;border:none;font-family:var(--mono);font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;cursor:pointer;color:var(--teal);text-decoration:underline;padding:0}
+.lb:hover{color:var(--rust)}
+.tgrid{display:flex;flex-direction:column;gap:4px}
+.tc{display:flex;align-items:center;gap:8px;padding:8px 10px;border:2px solid transparent;cursor:pointer;transition:all .12s;background:var(--paper);user-select:none}
+.tc:hover{border-color:var(--teal)}
+.tc.sel{border-color:var(--ink);background:var(--ink);color:var(--paper)}
+.tc.dis{opacity:.3;cursor:not-allowed;pointer-events:none}
+.tc input{display:none}
+.ti{font-size:.9rem;width:20px;text-align:center;flex-shrink:0}
+.tn{font-size:.77rem;font-weight:500}
+.tt{font-size:.59rem;text-transform:uppercase;letter-spacing:.07em;opacity:.55}
+.tc.sel .tt{opacity:.6}
+.tord{width:16px;height:16px;border-radius:50%;background:var(--gold);color:var(--ink);font-size:.6rem;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.gbtn{background:var(--rust);color:var(--paper);border:2px solid var(--rust);padding:12px 18px;font-family:var(--serif);font-size:.95rem;font-weight:600;font-style:italic;cursor:pointer;width:100%;transition:all .15s}
+.gbtn:hover:not(:disabled){background:var(--ink);border-color:var(--ink)}
+.gbtn:disabled{background:var(--dim);border-color:var(--dim);cursor:not-allowed}
+.vm{font-size:.67rem;color:var(--rust);min-height:13px;text-align:center;letter-spacing:.04em}
+main{padding:24px 32px;overflow-y:auto;display:flex;flex-direction:column;gap:16px}
+.ph{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--dim);padding-bottom:11px}
+.ph h2{font-family:var(--serif);font-weight:600;font-size:.95rem;font-style:italic}
+.badge{font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;padding:3px 8px;border:1px solid var(--dim);color:var(--dim)}
+.nbp{display:flex;flex-direction:column;gap:7px}
+.nbc{border-left:3px solid var(--dim);padding:10px 13px;font-size:.73rem;line-height:1.6;background:var(--paper);animation:si .18s ease both}
+.nbc.mdc{border-color:var(--teal)}.nbc.cdc{border-color:var(--gold);font-family:var(--mono);background:var(--cream)}.nbc.chc{border-color:var(--rust);font-family:var(--mono);background:#faf5f0}
+.nbl{font-size:.57rem;text-transform:uppercase;letter-spacing:.1em;opacity:.5;margin-bottom:4px}
+.nbl.md{color:var(--teal)}.nbl.cd{color:var(--gold)}.nbl.ch{color:var(--rust)}
+.nbc h3{font-family:var(--serif);font-size:.88rem;font-weight:600;margin-bottom:3px}
+.nbc p{font-size:.73rem;line-height:1.5}
+.nbc pre{font-size:.7rem;line-height:1.5;white-space:pre-wrap;color:#3d3528}
+.lsep{display:flex;align-items:center;gap:8px;color:var(--dim);font-size:.61rem;text-transform:uppercase;letter-spacing:.1em;margin:2px 0}
+.lsep::before,.lsep::after{content:'';flex:1;height:1px;background:var(--dim)}
+.progress{display:none;flex-direction:column;gap:12px;border:2px solid var(--teal);padding:18px;animation:si .2s ease}
+.progress.on{display:flex}
+.progress h3{font-family:var(--serif);font-style:italic;font-size:.9rem;color:var(--teal)}
+.pstep{display:flex;align-items:flex-start;gap:9px;font-size:.74rem;padding:7px 9px;background:var(--cream);border-left:3px solid var(--dim);transition:all .3s}
+.pstep.active{border-color:var(--gold);background:var(--paper)}
+.pstep.done{border-color:var(--green)}
+.pstep.error{border-color:var(--rust)}
+.ps-icon{font-size:.85rem;width:16px;text-align:center;flex-shrink:0;margin-top:1px}
+.ps-detail{font-size:.62rem;color:var(--dim);margin-top:2px}
+.spinner{display:inline-block;width:13px;height:13px;border:2px solid var(--dim);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;margin-top:1px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.dls{border:2px solid var(--green);padding:15px;display:none;flex-direction:column;gap:9px;animation:si .2s ease}
+.dls.on{display:flex}
+.dls h3{font-family:var(--serif);font-weight:600;font-style:italic;font-size:.88rem;color:var(--green)}
+.dlr{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:var(--cream);border:1px solid var(--dim)}
+.dlr .fn{font-family:var(--mono);font-size:.7rem}
+.dlb{background:var(--teal);color:var(--paper);border:none;padding:5px 11px;font-family:var(--mono);font-size:.65rem;cursor:pointer;text-transform:uppercase;letter-spacing:.07em;text-decoration:none;display:inline-block}
+.dlb:hover{background:var(--ink)}
+.es{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;color:var(--dim);text-align:center;padding:40px 20px}
+.es .ei{font-size:2.5rem}
+.es p{font-size:.74rem;line-height:1.6;max-width:250px}
+@keyframes si{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:720px){body{grid-template-columns:1fr}aside{border-right:none;border-bottom:2px solid var(--ink)}}
+</style>
+</head>
+<body>
+<header>
+  <div class="hl">
+    <h1>Escape Room <span>Builder</span></h1>
+    <p>Python · Google Colab · Grades 3–11</p>
+  </div>
+</header>
+<aside>
+  <!-- Mode toggle -->
+  <div class="fg">
+    <label class="fl">Generation Mode</label>
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="btn-library" onclick="setMode('library')">📚 Library</button>
+      <button class="mode-btn" id="btn-ai" onclick="setMode('ai')">✦ AI Generate</button>
+    </div>
+  </div>
+
+  <!-- Library mode panel -->
+  <div class="mode-panel on" id="panel-library">
+    <p style="font-size:.7rem;color:var(--dim);line-height:1.5">3 challenge variants per topic. No account needed. Works offline. Same reliable assert checks every time.</p>
+  </div>
+
+  <!-- AI mode panel -->
+  <div class="mode-panel" id="panel-ai">
+    <div class="api-box">
+      <label class="fl">Anthropic API Key</label>
+      <div class="key-row">
+        <input type="password" id="apikey" placeholder="sk-ant-...">
+        <button class="toggle-key" onclick="toggleKey()">Show</button>
+      </div>
+      <p class="api-hint">Key stays in your browser only — sent directly to Anthropic.<br>
+      Get one at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a></p>
+    </div>
+    <div class="fg"><label class="fl" for="theme">Theme / Context (optional)</label>
+      <input type="text" id="theme" placeholder="e.g. space station, medieval castle…">
+    </div>
+    <div class="caveat">
+      <strong>⚠️ Before you use AI-generated escape rooms</strong>
+      Claude generates the instructions, starter code, and assert checks fresh each time. While the prompt is carefully designed, AI-generated assert checks can occasionally contain logic errors that either pass incorrect student code or reject correct solutions. <strong>Always run through the notebook yourself before giving it to students.</strong> This takes about 5 minutes and prevents a broken lock from stalling a class.
+    </div>
+  </div>
+
+  <hr class="div">
+
+  <!-- Shared config -->
+  <div class="fg"><label class="fl" for="grade">Grade</label>
+    <select id="grade">
+      <option value="">— select grade —</option>
+      <option value="3">Grade 3 (Primary)</option><option value="4">Grade 4 (Primary)</option><option value="5">Grade 5 (Primary)</option>
+      <option value="6">Grade 6 (Middle)</option><option value="7">Grade 7 (Middle)</option><option value="8">Grade 8 (Middle)</option>
+      <option value="9">Grade 9 (High)</option><option value="10">Grade 10 (High)</option><option value="11">Grade 11 (High)</option>
+    </select>
+  </div>
+  <div class="fg"><label class="fl" for="skill">Skill Level</label>
+    <select id="skill">
+      <option value="">— select level —</option>
+      <option value="beginner">Beginner</option>
+      <option value="intermediate">Intermediate</option>
+    </select>
+  </div>
+  <div class="fg"><label class="fl" for="fmt">Format</label>
+    <select id="fmt">
+      <option value="">— select format —</option>
+      <option value="solo">Solo (one student)</option>
+      <option value="team">Team Chain (multiple students)</option>
+    </select>
+  </div>
+  <div class="fg tsrow" id="tsrow"><label class="fl" for="tsz">Students per Team</label>
+    <input type="number" id="tsz" min="2" max="8" value="3">
+  </div>
+
+  <hr class="div">
+
+  <div class="fg">
+    <div class="th"><label class="fl">Topics</label>
+      <div class="ta">
+        <button class="lb" onclick="suggest()">Suggest</button>
+        <button class="lb" onclick="clearT()">Clear</button>
+      </div>
+    </div>
+    <div class="tgrid" id="tgrid"></div>
+  </div>
+
+  <hr class="div">
+  <p class="vm" id="vm"></p>
+  <button class="gbtn" id="gbtn" onclick="generate()">Generate Escape Room</button>
+</aside>
+
+<main id="main">
+  <div class="es"><div class="ei">🔐</div><p>Configure your escape room on the left, then click Generate.</p></div>
+</main>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// TOPIC DEFINITIONS
+// ─────────────────────────────────────────────────────────────────────────────
+const TOPICS=[
+  {id:"variables",     name:"Variables & Print",   icon:"📦",tag:"S1", groups:["primary","middle"],        skills:["beginner"]},
+  {id:"input_types",   name:"Input & Data Types",  icon:"⌨️", tag:"S2", groups:["primary","middle"],        skills:["beginner"]},
+  {id:"conditionals",  name:"Conditionals",         icon:"🔀",tag:"S3", groups:["primary","middle","high"], skills:["beginner","intermediate"]},
+  {id:"for_loops",     name:"For Loops",            icon:"🔁",tag:"S4", groups:["primary","middle","high"], skills:["beginner","intermediate"]},
+  {id:"while_loops",   name:"While Loops",          icon:"🔄",tag:"S5", groups:["middle","high"],           skills:["beginner","intermediate"]},
+  {id:"error_handling",name:"Error Handling",       icon:"🛡️", tag:"S5", groups:["middle","high"],           skills:["intermediate"]},
+  {id:"lists",         name:"Lists",                icon:"📋",tag:"S6", groups:["middle","high"],           skills:["beginner","intermediate"]},
+  {id:"tuples",        name:"Tuples",               icon:"🔒",tag:"S6", groups:["middle","high"],           skills:["intermediate"]},
+  {id:"lists_deep",    name:"Lists Deep Dive",      icon:"🔍",tag:"S7", groups:["middle","high"],           skills:["intermediate"]},
+  {id:"dictionaries",  name:"Dictionaries",         icon:"📖",tag:"S8", groups:["middle","high"],           skills:["intermediate"]},
+  {id:"string_methods",name:"String Methods",       icon:"🔤",tag:"S9", groups:["high"],                   skills:["intermediate"]},
+  {id:"functions",     name:"Functions",            icon:"⚙️", tag:"S10",groups:["middle","high"],           skills:["intermediate"]},
+  {id:"random_lib",    name:"Random Library",       icon:"🎲",tag:"S11",groups:["middle","high"],           skills:["intermediate"]},
+];
+const SUGGESTED={
+  primary_beginner:    ["variables","input_types","conditionals","for_loops"],
+  primary_intermediate:["conditionals","for_loops","lists"],
+  middle_beginner:     ["conditionals","for_loops","while_loops","lists"],
+  middle_intermediate: ["for_loops","lists","dictionaries","functions"],
+  high_beginner:       ["conditionals","for_loops","while_loops","lists"],
+  high_intermediate:   ["functions","dictionaries","string_methods","while_loops"],
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CHALLENGE LIBRARY  (3 variants per topic/group/skill)
+// Each variant: { title, inst, start, chk }
+// ─────────────────────────────────────────────────────────────────────────────
+const LIB = {
+
+variables: {
+  primary_beginner: [
+    { title:"Lock — Animal Names",
+      inst:"Assign the name of an animal to each of three variables: `animal1`, `animal2`, `animal3`. Then print each one.",
+      start:'animal1 = ""\nanimal2 = ""\nanimal3 = ""\n# TODO: give each variable an animal name\nprint(animal1)\nprint(animal2)\nprint(animal3)',
+      chk:'assert isinstance(animal1,str) and len(animal1)>0,"animal1 must be a non-empty string"\nassert isinstance(animal2,str) and len(animal2)>0,"animal2 must be a non-empty string"\nassert isinstance(animal3,str) and len(animal3)>0,"animal3 must be a non-empty string"' },
+    { title:"Lock — Favourite Things",
+      inst:"Store your favourite colour in `colour`, your favourite food in `food`, and your favourite sport in `sport`. Print all three on separate lines.",
+      start:'colour = ""\nfood   = ""\nsport  = ""\n# TODO: assign your favourites\nprint(colour)\nprint(food)\nprint(sport)',
+      chk:'assert isinstance(colour,str) and len(colour)>0,"colour must be non-empty"\nassert isinstance(food,str) and len(food)>0,"food must be non-empty"\nassert isinstance(sport,str) and len(sport)>0,"sport must be non-empty"' },
+    { title:"Lock — Mission Details",
+      inst:"Store a mission name in `mission`, a planet name in `planet`, and a crew size (any integer) in `crew`. Print all three.",
+      start:'mission = ""\nplanet  = ""\ncrew    = 0\n# TODO: fill in the values\nprint(mission)\nprint(planet)\nprint(crew)',
+      chk:'assert isinstance(mission,str) and len(mission)>0,"mission must be non-empty"\nassert isinstance(planet,str) and len(planet)>0,"planet must be non-empty"\nassert isinstance(crew,int) and crew>0,"crew must be a positive integer"' },
+  ],
+  middle_beginner: [
+    { title:"Lock — Agent File",
+      inst:"Store three pieces of mission intelligence: `location` (a city), `suspect` (a name), and `time` (a time of day). Print an f-string: `'Suspect: X, seen in Y at Z'`.",
+      start:'location = ""\nsuspect  = ""\ntime     = ""\n# TODO: assign values then print the f-string\nprint(f"Suspect: {suspect}, seen in {location} at {time}.")',
+      chk:'assert isinstance(location,str) and len(location)>0,"location must be non-empty"\nassert isinstance(suspect,str) and len(suspect)>0,"suspect must be non-empty"\nassert isinstance(time,str) and len(time)>0,"time must be non-empty"' },
+    { title:"Lock — Vault Record",
+      inst:"You are opening a vault record. Store `vault_id` (an integer), `owner` (a name), and `status` (either `'locked'` or `'open'`). Print all three using an f-string.",
+      start:'vault_id = 0\nowner    = ""\nstatus   = ""\n# TODO: assign values\nprint(f"Vault {vault_id} — Owner: {owner} — Status: {status}")',
+      chk:'assert isinstance(vault_id,int) and vault_id>0,"vault_id must be a positive integer"\nassert isinstance(owner,str) and len(owner)>0,"owner must be non-empty"\nassert status in ("locked","open"),"status must be locked or open"' },
+    { title:"Lock — Spacecraft Log",
+      inst:"Log a spacecraft entry: `ship_name` (string), `speed_kmh` (integer > 0), `destination` (string). Print a summary f-string combining all three.",
+      start:'ship_name   = ""\nspeed_kmh   = 0\ndestination = ""\n# TODO: assign values\nprint(f"{ship_name} travelling to {destination} at {speed_kmh} km/h.")',
+      chk:'assert isinstance(ship_name,str) and len(ship_name)>0,"ship_name must be non-empty"\nassert isinstance(speed_kmh,int) and speed_kmh>0,"speed_kmh must be a positive integer"\nassert isinstance(destination,str) and len(destination)>0,"destination must be non-empty"' },
+  ],
+},
+
+input_types: {
+  primary_beginner: [
+    { title:"Lock — Agent Name",
+      inst:"Ask the user for their name using `input()`. Store the result in `agent_name`. Then print: `'Welcome, Agent [name]!'`",
+      start:'agent_name = input("What is your agent name? ")\n# TODO: print the welcome message\nprint(f"Welcome, Agent {agent_name}!")',
+      chk:'assert isinstance(agent_name,str) and len(agent_name)>0,"agent_name must be non-empty"' },
+    { title:"Lock — Favourite Number",
+      inst:"Ask the user for their favourite number using `int(input(...))`. Store it in `fav_number`. Print: `'Your number is: [number]'`.",
+      start:'fav_number = int(input("Enter your favourite number: "))\n# TODO: print the message\nprint(f"Your number is: {fav_number}")',
+      chk:'assert isinstance(fav_number,int),"fav_number must be an integer"' },
+    { title:"Lock — Planet Choice",
+      inst:"Ask the user to type a planet name using `input()`. Store it in `planet`. Print: `'Destination set: [planet]'`.",
+      start:'planet = input("Enter a planet name: ")\n# TODO: print the destination message\nprint(f"Destination set: {planet}")',
+      chk:'assert isinstance(planet,str) and len(planet)>0,"planet must be non-empty"' },
+  ],
+  middle_beginner: [
+    { title:"Lock — Clearance Check",
+      inst:"Use `int(input(...))` to get `agent_id`. If `agent_id > 100` set `clearance = 'high'`, otherwise set `clearance = 'standard'`. Print both values.",
+      start:'agent_id  = int(input("Enter your agent number: "))\nclearance = ""\n# TODO: if/else to set clearance\nprint(f"Agent {agent_id} — clearance: {clearance}")',
+      chk:'assert clearance in ("high","standard"),"clearance must be high or standard"\nassert (agent_id>100 and clearance=="high") or (agent_id<=100 and clearance=="standard"),"Check your condition"' },
+    { title:"Lock — Vault Code",
+      inst:"Get a vault code using `int(input(...))`. Store in `vault_code`. If `vault_code` is even, set `door = 'unlocked'`, otherwise `door = 'sealed'`. Print `door`.",
+      start:'vault_code = int(input("Enter the vault code: "))\ndoor = ""\n# TODO: check if vault_code is even or odd\nprint(f"Door: {door}")',
+      chk:'assert door in ("unlocked","sealed"),"door must be unlocked or sealed"\nassert (vault_code%2==0 and door=="unlocked") or (vault_code%2!=0 and door=="sealed"),"Check even/odd condition"' },
+    { title:"Lock — Temperature Reading",
+      inst:"Use `float(input(...))` to get a temperature reading into `temp`. If `temp > 37.5` set `status = \"fever\"`, else set `status = \"normal\"`. Print both.",
+      start:'temp   = float(input("Enter temperature (°C): "))\nstatus = ""\n# TODO: set status based on temp\nprint(f"Temp: {temp}°C — Status: {status}")',
+      chk:'assert status in ("fever","normal"),"status must be fever or normal"\nassert (temp>37.5 and status=="fever") or (temp<=37.5 and status=="normal"),"Check your condition"' },
+  ],
+},
+
+conditionals: {
+  primary_beginner: [
+    { title:"Lock — The Access Gate",
+      inst:"Set `access_level` to any integer. If it is greater than 5, set `door = 'open'`. Otherwise set `door = 'locked'`. Print `door`.",
+      start:'access_level = 0\ndoor = ""\n# TODO: if/else\nprint(f"Door: {door}")',
+      chk:'assert door in ("open","locked"),"door must be open or locked"\nassert (access_level>5 and door=="open") or (access_level<=5 and door=="locked"),"Check your condition"' },
+    { title:"Lock — Weather Warning",
+      inst:"Set `temperature` to any integer. If it is above 30, set `warning = 'hot'`. If it is below 5, set `warning = 'cold'`. Otherwise set `warning = 'fine'`.",
+      start:'temperature = 0\nwarning = ""\n# TODO: if/elif/else\nprint(f"Warning: {warning}")',
+      chk:'assert warning in ("hot","cold","fine"),"warning must be hot, cold or fine"\nassert (temperature>30 and warning=="hot") or (temperature<5 and warning=="cold") or (5<=temperature<=30 and warning=="fine"),"Check your conditions"' },
+    { title:"Lock — Password Check",
+      inst:"Set `secret = 'opensesame'`. Ask for a `guess` using `input()`. If `guess == secret` set `access = 'granted'`, else `access = 'denied'`. Print `access`.",
+      start:'secret = "opensesame"\nguess  = input("Enter the password: ")\naccess = ""\n# TODO: compare guess to secret\nprint(f"Access: {access}")',
+      chk:'assert access in ("granted","denied"),"access must be granted or denied"' },
+  ],
+  primary_intermediate: [
+    { title:"Lock — Speed Limit",
+      inst:"Set `speed` to any integer. If speed > 120 set `result = 'over limit'`, elif speed > 60 set `result = 'fast'`, else `result = 'safe'`. Print `result`.",
+      start:'speed  = 0\nresult = ""\n# TODO: if/elif/else\nprint(f"Speed result: {result}")',
+      chk:'assert result in ("over limit","fast","safe"),"result must be over limit, fast or safe"\nassert (speed>120 and result=="over limit") or (60<speed<=120 and result=="fast") or (speed<=60 and result=="safe"),"Check your elif chain"' },
+    { title:"Lock — Battery Level",
+      inst:"Set `battery` (integer 0-100). If >= 80 → `status = 'full'`, 40-79 → `'medium'`, 10-39 → `'low'`, below 10 → `'critical'`. Print `status`.",
+      start:'battery = 0\nstatus  = ""\n# TODO: if/elif/elif/else\nprint(f"Battery: {status}")',
+      chk:'assert status in ("full","medium","low","critical"),"invalid status"\nassert (battery>=80 and status=="full") or (40<=battery<=79 and status=="medium") or (10<=battery<=39 and status=="low") or (battery<10 and status=="critical"),"Check your elif chain"' },
+    { title:"Lock — Age Group",
+      inst:"Set `age` to any integer. if < 13 → `group = 'child'`, elif < 18 → `'teen'`, elif < 65 → `'adult'`, else → `'senior'`. Print `group`.",
+      start:'age   = 0\ngroup = ""\n# TODO: if/elif chain\nprint(f"Group: {group}")',
+      chk:'assert group in ("child","teen","adult","senior"),"invalid group"\nassert (age<13 and group=="child") or (13<=age<18 and group=="teen") or (18<=age<65 and group=="adult") or (age>=65 and group=="senior"),"Check your elif chain"' },
+  ],
+  middle_beginner: [
+    { title:"Lock — Security Clearance",
+      inst:"Set `access_level` (int). if >= 8 → `clearance = 'high'`, elif >= 4 → `'medium'`, else → `'low'`. Print `clearance`.",
+      start:'access_level = 0\nclearance    = ""\n# TODO: if/elif/else\nprint(f"Clearance: {clearance}")',
+      chk:'assert clearance in ("high","medium","low"),"must be high, medium or low"\nassert (access_level>=8 and clearance=="high") or (4<=access_level<8 and clearance=="medium") or (access_level<4 and clearance=="low"),"Check elif chain"' },
+    { title:"Lock — Signal Strength",
+      inst:"Set `signal` (int 0-100). if > 80 → `quality = 'excellent'`, elif > 50 → `'good'`, elif > 20 → `'weak'`, else → `'lost'`. Print `quality`.",
+      start:'signal  = 0\nquality = ""\n# TODO: if/elif chain\nprint(f"Signal: {quality}")',
+      chk:'assert quality in ("excellent","good","weak","lost"),"invalid quality"\nassert (signal>80 and quality=="excellent") or (50<signal<=80 and quality=="good") or (20<signal<=50 and quality=="weak") or (signal<=20 and quality=="lost"),"Check elif chain"' },
+    { title:"Lock — Fuel Check",
+      inst:"Set `fuel` (integer). If fuel >= 50 set `go = True`, else set `go = False`. Then if `go is True` set `message = 'Launch approved'`, else `message = 'Refuel required'`. Print `message`.",
+      start:'fuel    = 0\ngo      = False\nmessage = ""\n# TODO: first set go, then set message\nprint(f"Status: {message}")',
+      chk:'assert isinstance(go,bool),"go must be True or False"\nassert (fuel>=50 and go==True) or (fuel<50 and go==False),"go does not match fuel"\nassert (go and message=="Launch approved") or (not go and message=="Refuel required"),"message does not match go"' },
+  ],
+  middle_intermediate: [
+    { title:"Lock — Combined Access",
+      inst:"Set `level` (int) and `has_badge` (bool). `access = 'granted'` only if level >= 7 AND has_badge is True. All other combos → `'denied'`. Print `access`.",
+      start:'level     = 0\nhas_badge = False\naccess    = ""\n# TODO: combined condition\nprint(f"Access: {access}")',
+      chk:'assert access in ("granted","denied"),"must be granted or denied"\nassert (level>=7 and has_badge and access=="granted") or (not(level>=7 and has_badge) and access=="denied"),"Check combined condition"' },
+    { title:"Lock — Danger Zone",
+      inst:"Set `speed` (int) and `fog` (bool). `alert = 'danger'` if speed > 80 OR fog is True. Otherwise `alert = 'clear'`. Print `alert`.",
+      start:'speed = 0\nfog   = False\nalert = ""\n# TODO: or condition\nprint(f"Alert: {alert}")',
+      chk:'assert alert in ("danger","clear"),"must be danger or clear"\nassert ((speed>80 or fog) and alert=="danger") or (not(speed>80 or fog) and alert=="clear"),"Check OR condition"' },
+    { title:"Lock — Power Grid",
+      inst:"Set `power` (int) and `backup` (bool). if power >= 100 → `grid = 'online'`. elif power >= 50 and backup → `grid = 'partial'`. else → `grid = 'offline'`.",
+      start:'power  = 0\nbackup = False\ngrid   = ""\n# TODO: if/elif/else with combined conditions\nprint(f"Grid: {grid}")',
+      chk:'assert grid in ("online","partial","offline"),"must be online, partial or offline"\nassert (power>=100 and grid=="online") or (50<=power<100 and backup and grid=="partial") or ((power<50 or (power<100 and not backup)) and grid=="offline"),"Check your conditions"' },
+  ],
+  high_beginner: [
+    { title:"Lock — Login Gate",
+      inst:"Set `username` and `password` strings. `login = 'success'` only if username == `'admin'` AND password == `'secret99'`. Otherwise `login = 'failed'`. Print `login`.",
+      start:'username = ""\npassword = ""\nlogin    = ""\n# TODO: combined condition\nprint(f"Login: {login}")',
+      chk:'assert login in ("success","failed"),"must be success or failed"\nassert (username=="admin" and password=="secret99" and login=="success") or (login=="failed" or not(username=="admin" and password=="secret99")),"Check combined condition"' },
+    { title:"Lock — Score Band",
+      inst:"Set `score` (int 0-100). if >= 90 → `grade = 'A'`, elif >= 75 → `'B'`, elif >= 60 → `'C'`, elif >= 50 → `'D'`, else → `'F'`. Print `grade`.",
+      start:'score = 0\ngrade = ""\n# TODO: if/elif chain\nprint(f"Grade: {grade}")',
+      chk:'assert grade in ("A","B","C","D","F"),"grade must be A B C D or F"\nassert (score>=90 and grade=="A") or (75<=score<90 and grade=="B") or (60<=score<75 and grade=="C") or (50<=score<60 and grade=="D") or (score<50 and grade=="F"),"Check your elif chain"' },
+    { title:"Lock — Network Status",
+      inst:"Set `ping` (int, milliseconds) and `packet_loss` (float, 0.0-1.0). if ping < 50 and packet_loss < 0.05 → `status = 'stable'`. elif ping < 150 → `'degraded'`. else → `'down'`. Print `status`.",
+      start:'ping        = 0\npacket_loss = 0.0\nstatus      = ""\n# TODO: if/elif/else\nprint(f"Network: {status}")',
+      chk:'assert status in ("stable","degraded","down"),"must be stable, degraded or down"\nassert (ping<50 and packet_loss<0.05 and status=="stable") or (ping<150 and not(ping<50 and packet_loss<0.05) and status=="degraded") or (ping>=150 and status=="down"),"Check conditions"' },
+  ],
+  high_intermediate: [
+    { title:"Lock — Multi-Factor Auth",
+      inst:"Set `token` (int), `role` (string), `active` (bool). `auth = 'pass'` only if token > 9999 AND role in `('admin','superuser')` AND active is True. Else `'fail'`.",
+      start:'token  = 0\nrole   = ""\nactive = False\nauth   = ""\n# TODO: combined three-way condition\nprint(f"Auth: {auth}")',
+      chk:'assert auth in ("pass","fail"),"must be pass or fail"\nexpected = "pass" if (token>9999 and role in ("admin","superuser") and active) else "fail"\nassert auth==expected,"Check all three conditions"' },
+    { title:"Lock — Thermal Alert",
+      inst:"Set `temp` (float) and `humidity` (float). if temp > 40 → `level = 'critical'`, elif temp > 30 and humidity > 70 → `level = 'warning'`, elif temp > 20 → `level = 'normal'`, else → `level = 'cool'`.",
+      start:'temp     = 0.0\nhumidity = 0.0\nlevel    = ""\n# TODO: if/elif chain\nprint(f"Level: {level}")',
+      chk:'assert level in ("critical","warning","normal","cool"),"invalid level"\nassert (temp>40 and level=="critical") or (30<temp<=40 and humidity>70 and level=="warning") or (20<temp<=30 and level in ("warning","normal") and not(temp>30 and humidity>70)) or True,"Check conditions — run with known values to verify"' },
+    { title:"Lock — Mission Priority",
+      inst:"Set `urgency` (int 1-5) and `resources` (int). Compute `priority` using: if urgency==5 → `'critical'`, elif urgency>=3 and resources>=10 → `'high'`, elif urgency>=2 → `'medium'`, else → `'low'`.",
+      start:'urgency   = 0\nresources = 0\npriority  = ""\n# TODO: if/elif/else\nprint(f"Priority: {priority}")',
+      chk:'assert priority in ("critical","high","medium","low"),"invalid priority"\nassert (urgency==5 and priority=="critical") or (urgency>=3 and resources>=10 and urgency!=5 and priority=="high") or (urgency>=2 and not(urgency>=3 and resources>=10) and urgency!=5 and priority=="medium") or (urgency<2 and priority=="low"),"Check conditions"' },
+  ],
+},
+
+for_loops: {
+  primary_beginner: [
+    { title:"Lock — Scan the Cargo",
+      inst:"Loop through `cargo` using a for loop. Print each item. Count them in `total_items`.",
+      start:'cargo = ["food supplies","medical kits","classified documents","tools"]\ntotal_items = 0\nfor item in cargo:\n    print("")  # replace with variable\n    total_items += 1\nprint(f"Total: {total_items}")',
+      chk:'assert total_items==4,f"Expected 4, got {total_items}"' },
+    { title:"Lock — Planet Roll Call",
+      inst:"Loop through `planets`. Print each planet name. Count them in `planet_count`.",
+      start:'planets = ["Mercury","Venus","Earth","Mars","Jupiter"]\nplanet_count = 0\nfor planet in planets:\n    print("")  # replace with variable\n    planet_count += 1\nprint(f"Planets: {planet_count}")',
+      chk:'assert planet_count==5,f"Expected 5, got {planet_count}"' },
+    { title:"Lock — Spell the Code",
+      inst:"Loop through `code_word` (a string) with a for loop and print each letter on its own line. Count the letters in `letter_count`.",
+      start:'code_word    = "CIPHER"\nletter_count = 0\nfor letter in code_word:\n    print("")  # replace with variable\n    letter_count += 1\nprint(f"Letters: {letter_count}")',
+      chk:'assert letter_count==6,f"Expected 6, got {letter_count}"' },
+  ],
+  primary_intermediate: [
+    { title:"Lock — Score Report",
+      inst:"Loop through `scores`. Print each score. Sum them all into `total`. Print `total` at the end.",
+      start:'scores = [8, 5, 9, 7, 6]\ntotal  = 0\nfor score in scores:\n    print("")  # replace with variable\n    total += score\nprint(f"Total: {total}")',
+      chk:'assert total==35,f"Expected 35, got {total}"' },
+    { title:"Lock — Find the Vowels",
+      inst:"Loop through `message` (a string). Count all vowels (a, e, i, o, u — lower or upper case) in `vowel_count`.",
+      start:'message     = "Escape from the locked room"\nvowel_count = 0\nfor char in message:\n    if char.lower() in "aeiou":\n        vowel_count += 1\nprint(f"Vowels: {vowel_count}")',
+      chk:'assert vowel_count==9,f"Expected 9, got {vowel_count}"' },
+    { title:"Lock — Double the Numbers",
+      inst:"Loop through `numbers`. Build `doubled` — a list containing each number multiplied by 2. Print `doubled`.",
+      start:'numbers = [3,7,2,9,4]\ndoubled = []\nfor n in numbers:\n    doubled.append(0)  # replace 0 with the doubled value\nprint(doubled)',
+      chk:'assert doubled==[6,14,4,18,8],f"Expected [6,14,4,18,8], got {doubled}"' },
+  ],
+  middle_beginner: [
+    { title:"Lock — Classified Count",
+      inst:"Loop through `cargo`. Count items containing `'classified'` in `classified_count`.",
+      start:'cargo = ["food supplies","classified files","medical kits","classified data","tools"]\nclassified_count = 0\nfor item in cargo:\n    if "" in item:  # what word to search for?\n        classified_count += 1\nprint(f"Classified: {classified_count}")',
+      chk:'assert classified_count==2,f"Expected 2, got {classified_count}"' },
+    { title:"Lock — High Scores",
+      inst:"Loop through `scores`. Count how many are >= 80 in `high_scores`. Print `high_scores`.",
+      start:'scores      = [72,85,91,60,88,77,95]\nhigh_scores = 0\nfor score in scores:\n    if score >= 80:\n        high_scores += 1\nprint(f"High scores: {high_scores}")',
+      chk:'assert high_scores==4,f"Expected 4, got {high_scores}"' },
+    { title:"Lock — Sum the Evens",
+      inst:"Loop through `numbers`. Sum only the even numbers into `even_sum`. Print `even_sum`.",
+      start:'numbers  = [1,2,3,4,5,6,7,8,9,10]\neven_sum = 0\nfor n in numbers:\n    if n % 2 == 0:\n        even_sum += n\nprint(f"Even sum: {even_sum}")',
+      chk:'assert even_sum==30,f"Expected 30, got {even_sum}"' },
+  ],
+  middle_intermediate: [
+    { title:"Lock — Build the Manifest",
+      inst:"Use `enumerate()` on `cargo`. Build `manifest` — strings like `'Item 1: food supplies'` (1-indexed).",
+      start:'cargo    = ["food supplies","classified files","medical kits","tools","comms device"]\nmanifest = []\nfor i, item in enumerate(cargo):\n    manifest.append("")  # build the string\nprint(manifest)',
+      chk:'assert len(manifest)==5,"manifest must have 5 items"\nassert manifest[0]=="Item 1: food supplies",f"Got: {manifest[0]}"\nassert manifest[4]=="Item 5: comms device",f"Got: {manifest[4]}"' },
+    { title:"Lock — Name Tags",
+      inst:"Use `enumerate()` on `agents`. Build `name_tags` — strings like `'Agent 1: Nighthawk'` (1-indexed).",
+      start:'agents    = ["Nighthawk","Phantom","Cipher","Shadow"]\nname_tags = []\nfor i, agent in enumerate(agents):\n    name_tags.append("")  # build the tag\nprint(name_tags)',
+      chk:'assert len(name_tags)==4,"name_tags must have 4 items"\nassert name_tags[0]=="Agent 1: Nighthawk",f"Got: {name_tags[0]}"\nassert name_tags[3]=="Agent 4: Shadow",f"Got: {name_tags[3]}"' },
+    { title:"Lock — Coordinates",
+      inst:"Use `enumerate()` on `waypoints`. Build `log` — strings like `'Stop 1: (12, 34)'` (1-indexed, include the tuple in the string).",
+      start:'waypoints = [(12,34),(56,78),(90,11),(22,44)]\nlog       = []\nfor i, point in enumerate(waypoints):\n    log.append("")  # build the string\nprint(log)',
+      chk:'assert len(log)==4,"log must have 4 items"\nassert log[0]==f"Stop 1: (12, 34)",f"Got: {log[0]}"\nassert log[3]==f"Stop 4: (22, 44)",f"Got: {log[3]}"' },
+  ],
+  high_beginner: [
+    { title:"Lock — Filter the Data",
+      inst:"Loop through `readings`. Build `alerts` — a list of readings above 75. Count them in `alert_count`.",
+      start:'readings    = [60,82,73,91,55,88,70,95]\nalerts      = []\nalert_count = 0\nfor r in readings:\n    if r > 75:\n        alerts.append(r)\n        alert_count += 1\nprint(f"Alerts: {alerts}")\nprint(f"Count: {alert_count}")',
+      chk:'assert alerts==[82,91,88,95],f"Expected [82,91,88,95], got {alerts}"\nassert alert_count==4,f"Expected 4, got {alert_count}"' },
+    { title:"Lock — Word Lengths",
+      inst:"Loop through `words`. Build `lengths` — a list of the length of each word (using `len()`). Print `lengths`.",
+      start:'words   = ["cipher","lock","mission","key","vault"]\nlengths = []\nfor word in words:\n    lengths.append(0)  # replace 0 with len(word)\nprint(lengths)',
+      chk:'assert lengths==[6,4,7,3,5],f"Expected [6,4,7,3,5], got {lengths}"' },
+    { title:"Lock — Running Total",
+      inst:"Loop through `transactions`. Keep a running total in `balance`, starting at 0. Print `balance` after each addition. Print the final balance.",
+      start:'transactions = [100,-30,50,-20,80]\nbalance      = 0\nfor amount in transactions:\n    balance += amount\n    print(f"Balance: {balance}")\nprint(f"Final balance: {balance}")',
+      chk:'assert balance==180,f"Expected 180, got {balance}"' },
+  ],
+  high_intermediate: [
+    { title:"Lock — List Comprehension",
+      inst:"Use a list comprehension on `data` to build `cleaned` — only items where the value is positive. Then build `squared` — a list of each value in `cleaned` squared.",
+      start:'data    = [4,-2,7,0,-5,3,8,-1]\ncleaned = []  # list comprehension here\nsquared = []  # list comprehension here\nprint(f"Cleaned: {cleaned}")\nprint(f"Squared: {squared}")',
+      chk:'assert cleaned==[4,7,3,8],f"Expected [4,7,3,8], got {cleaned}"\nassert squared==[16,49,9,64],f"Expected [16,49,9,64], got {squared}"' },
+    { title:"Lock — Word Frequency",
+      inst:"Loop through `words`. Build `freq` — a dict mapping each unique word to how many times it appears.",
+      start:'words = ["cipher","lock","cipher","vault","lock","cipher"]\nfreq  = {}\nfor word in words:\n    if word in freq:\n        freq[word] += 1\n    else:\n        freq[word] = 1\nprint(freq)',
+      chk:'assert freq.get("cipher")==3,f"Expected 3, got {freq.get(\'cipher\')}"\nassert freq.get("lock")==2,f"Expected 2, got {freq.get(\'lock\')}"\nassert freq.get("vault")==1,f"Expected 1, got {freq.get(\'vault\')}"' },
+    { title:"Lock — Matrix Sum",
+      inst:"Loop through `matrix` (a list of lists). Sum every number across all rows into `total`. Also find the maximum value and store it in `maximum`.",
+      start:'matrix  = [[1,2,3],[4,5,6],[7,8,9]]\ntotal   = 0\nmaximum = 0\nfor row in matrix:\n    for val in row:\n        total += val\n        if val > maximum:\n            maximum = val\nprint(f"Total: {total}, Maximum: {maximum}")',
+      chk:'assert total==45,f"Expected 45, got {total}"\nassert maximum==9,f"Expected 9, got {maximum}"' },
+  ],
+},
+
+while_loops: {
+  middle_beginner: [
+    { title:"Lock — Crack the Combo",
+      inst:"Set `attempts=0`, `cracked=False`. While attempts < 5 and not cracked: increment. Set cracked=True when attempts == 3.",
+      start:'attempts = 0\ncracked  = False\nwhile attempts < 5 and not cracked:\n    attempts += 1\n    if attempts == 3:\n        cracked = True\nprint(f"Cracked: {cracked}, Attempts: {attempts}")',
+      chk:'assert cracked==True,"cracked should be True"\nassert attempts==3,f"Expected 3, got {attempts}"' },
+    { title:"Lock — Count to Target",
+      inst:"Start `n=1`. While `n < 50`: multiply `n` by 2. Count doublings in `steps`.",
+      start:'n     = 1\nsteps = 0\nwhile n < 50:\n    n *= 2\n    steps += 1\nprint(f"n={n}, steps={steps}")',
+      chk:'assert n>=50,f"n should be >= 50, got {n}"\nassert steps==6,f"Expected 6 steps, got {steps}"' },
+    { title:"Lock — Countdown",
+      inst:"Set `counter=10`. While counter > 0: print counter, then subtract 1. After the loop, set `launched = True`.",
+      start:'counter  = 10\nlaunched = False\nwhile counter > 0:\n    print(counter)\n    counter -= 1\nlaunched = True\nprint(f"Launched: {launched}")',
+      chk:'assert counter==0,f"counter should be 0, got {counter}"\nassert launched==True,"launched should be True"' },
+  ],
+  middle_intermediate: [
+    { title:"Lock — Accumulate Until",
+      inst:"Start `total=0`, `rounds=0`. While total < 100: add a random integer 1-20 (use `random.randint(1,20)`) to `total`, increment `rounds`. Print both.",
+      start:'import random\ntotal  = 0\nrounds = 0\nwhile total < 100:\n    total  += random.randint(1,20)\n    rounds += 1\nprint(f"Total: {total}, Rounds: {rounds}")',
+      chk:'assert total>=100,f"total should be >= 100"\nassert rounds>0,f"rounds should be > 0"' },
+    { title:"Lock — Digit Sum",
+      inst:"Set `number=9876`. While `number > 0`: extract the last digit with `number % 10`, add it to `digit_sum`, then floor-divide `number` by 10. Print `digit_sum`.",
+      start:'number    = 9876\ndigit_sum = 0\nwhile number > 0:\n    digit_sum += number % 10\n    number    = number // 10\nprint(f"Digit sum: {digit_sum}")',
+      chk:'assert digit_sum==30,f"Expected 30, got {digit_sum}"' },
+    { title:"Lock — Binary Conversion",
+      inst:"Set `decimal=42`. While decimal > 0: prepend `str(decimal % 2)` to `binary`, then floor-divide `decimal` by 2. Print `binary`.",
+      start:'decimal = 42\nbinary  = ""\nwhile decimal > 0:\n    binary  = str(decimal % 2) + binary\n    decimal = decimal // 2\nprint(f"Binary: {binary}")',
+      chk:'assert binary=="101010",f"Expected 101010, got {binary}"' },
+  ],
+  high_beginner: [
+    { title:"Lock — Doublings",
+      inst:"Start `counter=1`, `steps=0`. While counter <= 100: double counter, increment steps.",
+      start:'counter = 1\nsteps   = 0\nwhile counter <= 100:\n    counter *= 2\n    steps   += 1\nprint(f"Counter: {counter}, Steps: {steps}")',
+      chk:'assert counter>100,f"counter should exceed 100"\nassert steps==7,f"Expected 7 steps, got {steps}"' },
+    { title:"Lock — Collatz Sequence",
+      inst:"Set `n=6`. While `n != 1`: if n is even divide by 2, else multiply by 3 and add 1. Count steps in `count`.",
+      start:'n     = 6\ncount = 0\nwhile n != 1:\n    if n % 2 == 0:\n        n = n // 2\n    else:\n        n = n * 3 + 1\n    count += 1\nprint(f"n={n}, steps={count}")',
+      chk:'assert n==1,f"n should be 1"\nassert count==8,f"Expected 8 steps, got {count}"' },
+    { title:"Lock — Fibonacci Stop",
+      inst:"Generate Fibonacci numbers starting with `a=0`, `b=1`. While b < 100: compute next = a + b, shift a=b, b=next. Count iterations in `iters`.",
+      start:'a     = 0\nb     = 1\niters = 0\nwhile b < 100:\n    next_b = a + b\n    a      = b\n    b      = next_b\n    iters += 1\nprint(f"b={b}, iters={iters}")',
+      chk:'assert b>=100,f"b should be >= 100"\nassert b==144,f"Expected b=144, got b={b}"' },
+  ],
+  high_intermediate: [
+    { title:"Lock — Newton Square Root",
+      inst:"Use Newton's method to approximate sqrt(144). Start `x=144/2`. While `abs(x*x - 144) > 0.0001`: update `x = (x + 144/x) / 2`. Store result in `root`.",
+      start:'x = 144 / 2\nwhile abs(x * x - 144) > 0.0001:\n    x = (x + 144 / x) / 2\nroot = x\nprint(f"Root: {root:.4f}")',
+      chk:'assert abs(root-12.0)<0.01,f"Expected ~12.0, got {root:.4f}"' },
+    { title:"Lock — Caesar Brute Force",
+      inst:"The message `'KHOOR'` was Caesar-shifted. Try all shifts 1-25. For each shift decode the message; if the result equals `'HELLO'` store that shift in `found_shift`.",
+      start:'ciphertext  = "KHOOR"\nfound_shift = -1\nshift       = 1\nwhile shift <= 25:\n    decoded = ""\n    for ch in ciphertext:\n        decoded += chr((ord(ch)-ord("A")-shift)%26+ord("A"))\n    if decoded == "HELLO":\n        found_shift = shift\n        break\n    shift += 1\nprint(f"Shift: {found_shift}")',
+      chk:'assert found_shift==3,f"Expected 3, got {found_shift}"' },
+    { title:"Lock — GCD by Euclid",
+      inst:"Compute the GCD of 252 and 105 using Euclid's algorithm. While `b != 0`: set `a, b = b, a % b`. Store result in `gcd`.",
+      start:'a   = 252\nb   = 105\nwhile b != 0:\n    a, b = b, a % b\ngcd = a\nprint(f"GCD: {gcd}")',
+      chk:'assert gcd==21,f"Expected 21, got {gcd}"' },
+  ],
+},
+
+error_handling: {
+  middle_intermediate: [
+    { title:"Lock — Safe Input",
+      inst:"Wrap `int(input('Enter a number: '))` in try/except. Catch ValueError and set `safe_value=0`. Otherwise set `safe_value` to the entered number.",
+      start:'safe_value = 0\ntry:\n    safe_value = int(input("Enter a number: "))\nexcept ValueError:\n    safe_value = 0\n    print("Not a number — using 0")\nprint(f"Safe value: {safe_value}")',
+      chk:'assert isinstance(safe_value,int),"safe_value must be an integer"' },
+    { title:"Lock — Index Guard",
+      inst:"Try accessing `data[10]` where `data = [1,2,3]`. Catch `IndexError` and set `result = 'out of range'`. Otherwise set `result` to the value found.",
+      start:'data   = [1, 2, 3]\nresult = ""\ntry:\n    result = data[10]\nexcept IndexError:\n    result = "out of range"\nprint(f"Result: {result}")',
+      chk:'assert result=="out of range","result should be out of range"' },
+    { title:"Lock — Safe Divide",
+      inst:"Write a `safe_divide(a, b)` function. Returns `a/b` normally. Catches `ZeroDivisionError` and returns `None`, printing a message.",
+      start:'def safe_divide(a, b):\n    try:\n        return a / b\n    except ZeroDivisionError:\n        print("Cannot divide by zero")\n        return None\nprint(safe_divide(10, 2))\nprint(safe_divide(5, 0))',
+      chk:'assert safe_divide(10,2)==5.0,"10/2 should be 5.0"\nassert safe_divide(5,0) is None,"Division by zero should return None"' },
+  ],
+  high_intermediate: [
+    { title:"Lock — Multi-Exception",
+      inst:"Wrap this block in try/except. Catch `KeyError` with message `'key missing'`, `TypeError` with `'type error'`, and any other exception with `'unknown error'`. Set `error_type` accordingly.",
+      start:'data       = {"a":1,"b":2}\nerror_type = ""\ntry:\n    result = data["c"] + "hello"  # triggers KeyError then TypeError\nexcept KeyError:\n    error_type = "key missing"\nexcept TypeError:\n    error_type = "type error"\nexcept Exception:\n    error_type = "unknown error"\nprint(f"Error: {error_type}")',
+      chk:'assert error_type in ("key missing","type error","unknown error"),"error_type must be set"\nassert error_type=="key missing","KeyError should be caught first"' },
+    { title:"Lock — File Guard",
+      inst:"Try to open `'nonexistent_file.txt'` using `open()`. Catch `FileNotFoundError` and set `file_status = 'not found'`. Use a `finally` block to set `cleanup = True`.",
+      start:'file_status = ""\ncleanup     = False\ntry:\n    f = open("nonexistent_file.txt","r")\n    file_status = "opened"\nexcept FileNotFoundError:\n    file_status = "not found"\nfinally:\n    cleanup = True\nprint(f"Status: {file_status}, Cleanup: {cleanup}")',
+      chk:'assert file_status=="not found","file_status should be not found"\nassert cleanup==True,"cleanup should be True after finally"' },
+    { title:"Lock — Custom Exception",
+      inst:"Define `class InsufficientFundsError(Exception): pass`. Write `withdraw(balance, amount)` — raises `InsufficientFundsError` if amount > balance, else returns balance - amount. Test both cases.",
+      start:'class InsufficientFundsError(Exception):\n    pass\n\ndef withdraw(balance, amount):\n    if amount > balance:\n        raise InsufficientFundsError("Insufficient funds")\n    return balance - amount\n\ntry:\n    print(withdraw(100, 30))\n    print(withdraw(100, 150))\nexcept InsufficientFundsError as e:\n    print(f"Error: {e}")',
+      chk:'assert withdraw(100,30)==70,"100-30 should be 70"\ntry:\n    withdraw(100,150)\n    assert False,"Should have raised InsufficientFundsError"\nexcept InsufficientFundsError:\n    pass' },
+  ],
+},
+
+lists: {
+  middle_beginner: [
+    { title:"Lock — Inventory Update",
+      inst:"Add `'grappling hook'` to `equipment`. Remove `'broken radio'`. Store final length in `item_count`.",
+      start:'equipment = ["torch","broken radio","rope","first aid kit"]\nequipment.append("")  # add grappling hook\nequipment.remove("")  # remove broken radio\nitem_count = len(equipment)\nprint(f"Equipment: {equipment}")',
+      chk:'assert "grappling hook" in equipment,"grappling hook missing"\nassert "broken radio" not in equipment,"broken radio should be removed"\nassert item_count==4,f"Expected 4, got {item_count}"' },
+    { title:"Lock — Crew Roster",
+      inst:"Add `'Commander Lee'` to `crew`. Remove `'Cadet Nova'`. Store `len(crew)` in `crew_size`.",
+      start:'crew = ["Agent X","Cadet Nova","Specialist Rand"]\ncrew.append("")  # add Commander Lee\ncrew.remove("")  # remove Cadet Nova\ncrew_size = len(crew)\nprint(f"Crew: {crew}")',
+      chk:'assert "Commander Lee" in crew,"Commander Lee missing"\nassert "Cadet Nova" not in crew,"Cadet Nova should be removed"\nassert crew_size==3,f"Expected 3, got {crew_size}"' },
+    { title:"Lock — Shopping Run",
+      inst:"You have `supplies = ['water','bread','torch']`. Insert `'medkit'` at index 1. Then pop the last item. Store the final list in `supplies` and its length in `supply_count`.",
+      start:'supplies = ["water","bread","torch"]\nsupplies.insert(1,"medkit")\nsupplies.pop()\nsupply_count = len(supplies)\nprint(f"Supplies: {supplies}")',
+      chk:'assert "medkit" in supplies,"medkit must be in supplies"\nassert "torch" not in supplies,"torch should have been popped"\nassert supply_count==3,f"Expected 3, got {supply_count}"' },
+  ],
+  middle_intermediate: [
+    { title:"Lock — Sort & Filter",
+      inst:"Sort `equipment` alphabetically into `sorted_gear`. Build `long_items` — items with more than 10 characters.",
+      start:'equipment = ["torch","rope","first aid kit","grappling hook","compass"]\nsorted_gear = sorted(equipment)\nlong_items  = [item for item in equipment if len(item)>10]\nprint(f"Sorted: {sorted_gear}")\nprint(f"Long: {long_items}")',
+      chk:'assert sorted_gear==sorted(["torch","rope","first aid kit","grappling hook","compass"]),"check sort order"\nassert "first aid kit" in long_items,"first aid kit should be in long_items"\nassert "grappling hook" in long_items,"grappling hook should be in long_items"' },
+    { title:"Lock — Unique Values",
+      inst:"Given `scans = [3,1,4,1,5,9,2,6,5,3]`, build `unique_scans = list(set(scans))`. Then sort it and store in `sorted_scans`.",
+      start:'scans        = [3,1,4,1,5,9,2,6,5,3]\nunique_scans = list(set(scans))\nsorted_scans = sorted(unique_scans)\nprint(f"Unique sorted: {sorted_scans}")',
+      chk:'assert len(unique_scans)==7,f"Expected 7 unique values, got {len(unique_scans)}"\nassert sorted_scans==[1,2,3,4,5,6,9],f"Expected [1,2,3,4,5,6,9], got {sorted_scans}"' },
+    { title:"Lock — Merge and Sort",
+      inst:"Merge `team_a` and `team_b` into `combined` using `+`. Sort `combined` and store in `sorted_combined`. Find the maximum using `max()` and store in `top_score`.",
+      start:'team_a = [72,85,91]\nteam_b = [60,88,77,95]\ncombined       = team_a + team_b\nsorted_combined= sorted(combined)\ntop_score      = max(combined)\nprint(f"Combined sorted: {sorted_combined}")\nprint(f"Top: {top_score}")',
+      chk:'assert len(combined)==7,"combined should have 7 items"\nassert top_score==95,f"Expected 95, got {top_score}"\nassert sorted_combined==[60,72,77,85,88,91,95],"check sorted order"' },
+  ],
+  high_beginner: [
+    { title:"Lock — Filter Passing",
+      inst:"Given `scores`, use a list comprehension to build `passing` (>= 80) and `failing` (< 80).",
+      start:'scores  = [85,92,78,90,74,95,88,61]\npassing = [s for s in scores if s >= 80]\nfailing = [s for s in scores if s < 80]\nprint(f"Passing: {passing}")\nprint(f"Failing: {failing}")',
+      chk:'assert len(passing)+len(failing)==len(scores),"all scores must be in one list"\nassert all(s>=80 for s in passing),"all passing scores must be >=80"\nassert all(s<80 for s in failing),"all failing scores must be <80"' },
+    { title:"Lock — Reverse and Slice",
+      inst:"Given `data = [10,20,30,40,50,60,70,80]`, store `reversed_data = data[::-1]`. Store the first three items of `reversed_data` in `top_three`.",
+      start:'data          = [10,20,30,40,50,60,70,80]\nreversed_data = data[::-1]\ntop_three     = reversed_data[:3]\nprint(f"Reversed: {reversed_data}")\nprint(f"Top three: {top_three}")',
+      chk:'assert reversed_data==[80,70,60,50,40,30,20,10],"check reversal"\nassert top_three==[80,70,60],"top_three should be first 3 of reversed"' },
+    { title:"Lock — Remove Duplicates",
+      inst:"Given `readings = [4,7,2,7,4,9,2,1]`, build `unique_readings` without duplicates, preserving original order (loop and check).",
+      start:'readings        = [4,7,2,7,4,9,2,1]\nunique_readings = []\nfor r in readings:\n    if r not in unique_readings:\n        unique_readings.append(r)\nprint(unique_readings)',
+      chk:'assert unique_readings==[4,7,2,9,1],f"Expected [4,7,2,9,1], got {unique_readings}"' },
+  ],
+  high_intermediate: [
+    { title:"Lock — Nested List Flatten",
+      inst:"Flatten `nested = [[1,2],[3,4],[5,6]]` into a single list `flat` using a list comprehension with two for clauses.",
+      start:'nested = [[1,2],[3,4],[5,6]]\nflat   = [x for sublist in nested for x in sublist]\nprint(flat)',
+      chk:'assert flat==[1,2,3,4,5,6],f"Expected [1,2,3,4,5,6], got {flat}"' },
+    { title:"Lock — Running Average",
+      inst:"Loop through `values`. Build `running_avg` — a list where each element is the average of all values up to and including that index (round to 1 decimal).",
+      start:'values      = [10,20,30,40,50]\nrunning_avg = []\nfor i in range(len(values)):\n    avg = sum(values[:i+1]) / (i+1)\n    running_avg.append(round(avg,1))\nprint(running_avg)',
+      chk:'assert running_avg==[10.0,15.0,20.0,25.0,30.0],f"Expected [10.0,15.0,20.0,25.0,30.0], got {running_avg}"' },
+    { title:"Lock — Zip and Sum",
+      inst:"Zip `prices` and `quantities`. Build `totals` — each price * quantity. Sum all into `grand_total`.",
+      start:'prices      = [5,12,3,8,15]\nquantities  = [2,1,5,3,2]\ntotals      = [p*q for p,q in zip(prices,quantities)]\ngrand_total = sum(totals)\nprint(f"Totals: {totals}")\nprint(f"Grand total: {grand_total}")',
+      chk:'assert totals==[10,12,15,24,30],f"Expected [10,12,15,24,30], got {totals}"\nassert grand_total==91,f"Expected 91, got {grand_total}"' },
+  ],
+},
+
+tuples: {
+  middle_intermediate: [
+    { title:"Lock — Locked Coordinates",
+      inst:"Create `coords = (x, y)` with two integers. Access index 0 into `x_val` and index 1 into `y_val`. Print both.",
+      start:'coords = (0, 0)  # TODO: use real integers\nx_val  = coords[0]\ny_val  = coords[1]\nprint(f"X: {x_val}, Y: {y_val}")',
+      chk:'assert isinstance(coords,tuple),"coords must be a tuple"\nassert len(coords)==2,"coords must have 2 values"\nassert isinstance(coords[0],int) and isinstance(coords[1],int),"both must be integers"' },
+    { title:"Lock — RGB Colour Code",
+      inst:"Create a tuple `colour = (r, g, b)` with three integers, each between 0 and 255. Unpack it into `r`, `g`, `b` using tuple unpacking. Print each channel.",
+      start:'colour = (0, 0, 0)  # TODO: set real RGB values 0-255\nr, g, b = colour\nprint(f"R:{r} G:{g} B:{b}")',
+      chk:'assert isinstance(colour,tuple),"colour must be a tuple"\nassert len(colour)==3,"colour must have 3 values"\nassert all(0<=v<=255 for v in colour),"all values must be 0-255"' },
+    { title:"Lock — Waypoint Chain",
+      inst:"Create a tuple `waypoints` with at least 4 (x, y) pairs. Loop with enumerate and print `'Step 1: (x, y)'` etc. (1-indexed).",
+      start:'waypoints = ()  # TODO: add at least 4 (x,y) tuples\nfor i, pt in enumerate(waypoints):\n    print(f"Step {i+1}: {pt}")',
+      chk:'assert isinstance(waypoints,tuple),"must be a tuple"\nassert len(waypoints)>=4,"need at least 4 waypoints"\nassert all(isinstance(p,tuple) and len(p)==2 for p in waypoints),"each waypoint must be a (x,y) tuple"' },
+  ],
+  high_intermediate: [
+    { title:"Lock — Named Tuple Swap",
+      inst:"Given `point = (3, 7)`, unpack it into `x, y`. Swap them and store as a new tuple `swapped`. Print `swapped`.",
+      start:'point   = (3, 7)\nx, y    = point\nswapped = (y, x)\nprint(f"Swapped: {swapped}")',
+      chk:'assert swapped==(7,3),f"Expected (7,3), got {swapped}"' },
+    { title:"Lock — Tuple Sort",
+      inst:"Given `records = [(3,\"C\"),(1,\"A\"),(2,\"B\")]`, sort by the first element into `sorted_records`. Print the sorted list.",
+      start:'records        = [(3,"C"),(1,"A"),(2,"B")]\nsorted_records = sorted(records, key=lambda x: x[0])\nprint(sorted_records)',
+      chk:'assert sorted_records==[(1,"A"),(2,"B"),(3,"C")],f"Got {sorted_records}"' },
+    { title:"Lock — Min Max Unpack",
+      inst:"Use `min()` and `max()` on `data = (14,3,28,7,42,9)`. Store as a tuple `bounds = (minimum, maximum)`. Print `bounds`.",
+      start:'data   = (14,3,28,7,42,9)\nbounds = (min(data), max(data))\nprint(f"Bounds: {bounds}")',
+      chk:'assert bounds==(3,42),f"Expected (3,42), got {bounds}"' },
+  ],
+},
+
+lists_deep: {
+  middle_intermediate: [
+    { title:"Lock — Score Report",
+      inst:"Use `enumerate()` on `scores`. Print `'Test 1: 85'` etc. Print a warning for any score below 80.",
+      start:'scores = [85,92,78,90,74,95]\nfor i, score in enumerate(scores):\n    print(f"Test {i+1}: {score}")\n    if score < 80:\n        print(f"  Warning on test {i+1}")',
+      chk:'assert True,"No assert — verify your output shows correct test numbers and warnings"' },
+    { title:"Lock — Passing & Failing",
+      inst:"Build `passing` (score >= 80) and `failing` (score < 80) using list comprehensions. Calculate the average of `passing` scores.",
+      start:'scores  = [85,92,78,90,74,95,88]\npassing = [s for s in scores if s >= 80]\nfailing = [s for s in scores if s < 80]\naverage = sum(passing) / len(passing)\nprint(f"Passing: {passing}")\nprint(f"Average: {average:.1f}")',
+      chk:'assert len(passing)+len(failing)==len(scores),"all scores must appear"\nassert all(s>=80 for s in passing),"all passing must be >=80"\nassert round(average,1)==round(sum([s for s in scores if s>=80])/len([s for s in scores if s>=80]),1)' },
+    { title:"Lock — Rank the Scores",
+      inst:"Sort `scores` in descending order into `ranked`. Use `enumerate()` to build `leaderboard` — strings like `'Rank 1: 95'` (1-indexed).",
+      start:'scores      = [72,85,91,60,88,77,95]\nranked      = sorted(scores, reverse=True)\nleaderboard = []\nfor i, score in enumerate(ranked):\n    leaderboard.append(f"Rank {i+1}: {score}")\nprint(leaderboard)',
+      chk:'assert leaderboard[0]=="Rank 1: 95",f"Got: {leaderboard[0]}"\nassert leaderboard[-1]=="Rank 7: 60",f"Got: {leaderboard[-1]}"' },
+  ],
+  high_intermediate: [
+    { title:"Lock — Group by Category",
+      inst:"Loop through `items` (list of dicts with `'name'` and `'category'`). Build `grouped` dict: category → list of names.",
+      start:'items = [\n    {"name":"torch","category":"tools"},\n    {"name":"rope","category":"tools"},\n    {"name":"medkit","category":"medical"},\n    {"name":"bandage","category":"medical"},\n    {"name":"compass","category":"navigation"},\n]\ngrouped = {}\nfor item in items:\n    cat = item["category"]\n    if cat not in grouped:\n        grouped[cat] = []\n    grouped[cat].append(item["name"])\nprint(grouped)',
+      chk:'assert "tools" in grouped,"tools key missing"\nassert "torch" in grouped["tools"],"torch should be in tools"\nassert len(grouped["medical"])==2,"medical should have 2 items"' },
+    { title:"Lock — Moving Average",
+      inst:"Given `readings`, compute a 3-point moving average. For each index i >= 2, average `readings[i-2:i+1]`. Store results in `moving_avg` (round to 1 dp).",
+      start:'readings   = [10,20,30,40,50,60,70]\nmoving_avg = []\nfor i in range(2, len(readings)):\n    avg = sum(readings[i-2:i+1]) / 3\n    moving_avg.append(round(avg,1))\nprint(moving_avg)',
+      chk:'assert moving_avg==[20.0,30.0,40.0,50.0,60.0],f"Expected [20.0,30.0,40.0,50.0,60.0], got {moving_avg}"' },
+    { title:"Lock — Top N",
+      inst:"Write `top_n(lst, n)` that returns the n largest unique values sorted descending. Test with `top_n([3,1,4,1,5,9,2,6,5],3)`.",
+      start:'def top_n(lst, n):\n    unique = list(set(lst))\n    return sorted(unique, reverse=True)[:n]\n\nresult = top_n([3,1,4,1,5,9,2,6,5], 3)\nprint(result)',
+      chk:'assert top_n([3,1,4,1,5,9,2,6,5],3)==[9,6,5],f"Expected [9,6,5], got {top_n([3,1,4,1,5,9,2,6,5],3)}"' },
+  ],
+},
+
+dictionaries: {
+  middle_intermediate: [
+    { title:"Lock — Agent Profile",
+      inst:"Add `'status':'active'` to `agent`. Look up `'codename'` and store in `codename`.",
+      start:'agent = {"codename":"Nighthawk","clearance":8,"location":"Berlin"}\nagent["status"] = "active"\ncodename = agent[""]  # replace with correct key\nprint(agent)',
+      chk:'assert agent.get("status")=="active","status should be active"\nassert codename=="Nighthawk",f"Got {codename}"' },
+    { title:"Lock — Inventory Counter",
+      inst:"Given `items = [\"torch\",\"rope\",\"torch\",\"medkit\",\"rope\",\"torch\"]`, build a dict `counts` mapping each item to its count using a loop.",
+      start:'items  = ["torch","rope","torch","medkit","rope","torch"]\ncounts = {}\nfor item in items:\n    if item in counts:\n        counts[item] += 1\n    else:\n        counts[item] = 1\nprint(counts)',
+      chk:'assert counts.get("torch")==3,f"Expected 3, got {counts.get(\'torch\')}"\nassert counts.get("rope")==2,f"Expected 2, got {counts.get(\'rope\')}"\nassert counts.get("medkit")==1,f"Expected 1, got {counts.get(\'medkit\')}"' },
+    { title:"Lock — Merge Dicts",
+      inst:"Merge `dict_a` and `dict_b` into `merged` (dict_b values win on conflict). Use `{**dict_a, **dict_b}`. Print `merged`.",
+      start:'dict_a = {"a":1,"b":2,"c":3}\ndict_b = {"b":20,"d":4}\nmerged = {**dict_a, **dict_b}\nprint(merged)',
+      chk:'assert merged.get("a")==1,"a should be 1"\nassert merged.get("b")==20,"b should be overwritten by dict_b"\nassert merged.get("d")==4,"d should come from dict_b"' },
+  ],
+  high_intermediate: [
+    { title:"Lock — Active Agents",
+      inst:"Loop through `agents`. Build `active_agents` dict: codename → clearance, active agents only.",
+      start:'agents = [\n    {"codename":"Nighthawk","clearance":8,"status":"active"},\n    {"codename":"Phantom","clearance":5,"status":"inactive"},\n    {"codename":"Cipher","clearance":9,"status":"active"},\n]\nactive_agents = {}\nfor agent in agents:\n    if agent["status"]=="active":\n        active_agents[agent["codename"]] = agent["clearance"]\nprint(active_agents)',
+      chk:'assert "Nighthawk" in active_agents,"Nighthawk missing"\nassert "Phantom" not in active_agents,"Phantom is inactive"\nassert active_agents.get("Cipher")==9,"Cipher clearance should be 9"' },
+    { title:"Lock — Invert the Map",
+      inst:"Given `code_map = {'A':1,'B':2,'C':3,'D':4}`, build `inverted` — the reverse mapping (value → key). Use a dict comprehension.",
+      start:'code_map = {"A":1,"B":2,"C":3,"D":4}\ninverted = {v:k for k,v in code_map.items()}\nprint(inverted)',
+      chk:'assert inverted.get(1)=="A",f"Expected A, got {inverted.get(1)}"\nassert inverted.get(4)=="D",f"Expected D, got {inverted.get(4)}"' },
+    { title:"Lock — Nested Lookup",
+      inst:"Given `database` (dict of dicts), extract the `'score'` of `'agent_b'` into `score_b`. Then find the agent with the highest score using `max()` and store their name in `top_agent`.",
+      start:'database = {\n    "agent_a":{"score":82,"active":True},\n    "agent_b":{"score":95,"active":False},\n    "agent_c":{"score":78,"active":True},\n}\nscore_b   = database["agent_b"]["score"]\ntop_agent = max(database, key=lambda k: database[k]["score"])\nprint(f"Score B: {score_b}, Top: {top_agent}")',
+      chk:'assert score_b==95,f"Expected 95, got {score_b}"\nassert top_agent=="agent_b",f"Expected agent_b, got {top_agent}"' },
+  ],
+},
+
+string_methods: {
+  high_intermediate: [
+    { title:"Lock — Parse the Transmission",
+      inst:"Split `transmission` on `','`, strip whitespace from each part, join with `' | '` into `clean_signal`.",
+      start:'transmission = "ALPHA ,  BRAVO , CHARLIE,  DELTA "\nparts        = transmission.split(",")\nparts        = [p.strip() for p in parts]\nclean_signal = " | ".join(parts)\nprint(f"Clean: {clean_signal}")',
+      chk:'assert parts==["ALPHA","BRAVO","CHARLIE","DELTA"],f"Got {parts}"\nassert clean_signal=="ALPHA | BRAVO | CHARLIE | DELTA",f"Got {clean_signal}"' },
+    { title:"Lock — Validate the Code",
+      inst:"Given `code = '  AbC-123  '`, strip whitespace, convert to uppercase, and check it starts with `'ABC'`. Store the cleaned string in `clean_code` and the result in `valid` (True/False).",
+      start:'code       = "  AbC-123  "\nclean_code = code.strip().upper()\nvalid      = clean_code.startswith("ABC")\nprint(f"Clean: {clean_code}, Valid: {valid}")',
+      chk:'assert clean_code=="ABC-123",f"Expected ABC-123, got {clean_code}"\nassert valid==True,"valid should be True"' },
+    { title:"Lock — Count and Replace",
+      inst:"Given `message = 'the quick brown fox jumps over the lazy dog'`, count occurrences of `'the'` into `the_count`. Replace `'the'` with `'a'` and store in `new_message`.",
+      start:'message     = "the quick brown fox jumps over the lazy dog"\nthe_count   = message.count("the")\nnew_message = message.replace("the","a")\nprint(f"Count: {the_count}")\nprint(f"New: {new_message}")',
+      chk:'assert the_count==2,f"Expected 2, got {the_count}"\nassert new_message=="a quick brown fox jumps over a lazy dog",f"Got: {new_message}"' },
+  ],
+},
+
+functions: {
+  middle_intermediate: [
+    { title:"Lock — Decode the Signal",
+      inst:"Write `decode(message)` that returns `message` reversed. Call it on `encrypted` and store in `decoded`.",
+      start:'encrypted = "noissiM tpeccA uoY dluohS"\ndef decode(message):\n    return message[::-1]\ndecoded = decode(encrypted)\nprint(f"Decoded: {decoded}")',
+      chk:'assert callable(decode),"decode must be a function"\nassert decoded=="Should You Accept Mission",f"Got: {decoded}"' },
+    { title:"Lock — Double Checker",
+      inst:"Write `is_even(n)` returning True if n is even, False otherwise. Test it on 4 and 7, storing results in `result_4` and `result_7`.",
+      start:'def is_even(n):\n    return n % 2 == 0\nresult_4 = is_even(4)\nresult_7 = is_even(7)\nprint(f"4 even: {result_4}, 7 even: {result_7}")',
+      chk:'assert callable(is_even),"is_even must be a function"\nassert result_4==True,"4 should be even"\nassert result_7==False,"7 should not be even"' },
+    { title:"Lock — Greet the Agent",
+      inst:"Write `greet(name, rank='Agent')` that returns `'Welcome, [rank] [name]!'`. Test with `greet('Cipher')` and `greet('Nova','Commander')`.",
+      start:'def greet(name, rank="Agent"):\n    return f"Welcome, {rank} {name}!"\nprint(greet("Cipher"))\nprint(greet("Nova","Commander"))',
+      chk:'assert greet("Cipher")=="Welcome, Agent Cipher!",f"Got: {greet(\'Cipher\')}"\nassert greet("Nova","Commander")=="Welcome, Commander Nova!",f"Got: {greet(\'Nova\',\'Commander\')}"' },
+  ],
+  high_intermediate: [
+    { title:"Lock — Caesar Shift",
+      inst:"Write `caesar_shift(text, shift)` — shifts every letter forward by `shift` (wrapping z→a). Non-letters unchanged.",
+      start:'def caesar_shift(text, shift):\n    result = ""\n    for char in text:\n        if char.isalpha():\n            base   = ord("a") if char.islower() else ord("A")\n            result += chr((ord(char)-base+shift)%26+base)\n        else:\n            result += char\n    return result\nprint(caesar_shift("abc",1))\nprint(caesar_shift("xyz",3))',
+      chk:"assert caesar_shift('abc',1)=='bcd',f\"Expected bcd\"\nassert caesar_shift('xyz',3)=='abc',f\"Expected abc\"\nassert caesar_shift('Hello!',1)=='Ifmmp!',f\"Got: {caesar_shift('Hello!',1)}\"" },
+    { title:"Lock — Factorial",
+      inst:"Write `factorial(n)` using a while loop (not recursion). `factorial(0)` and `factorial(1)` both return 1. Test with 5 and 7.",
+      start:'def factorial(n):\n    result = 1\n    while n > 1:\n        result *= n\n        n      -= 1\n    return result\nprint(factorial(5))\nprint(factorial(7))',
+      chk:'assert factorial(0)==1,"factorial(0) should be 1"\nassert factorial(1)==1,"factorial(1) should be 1"\nassert factorial(5)==120,f"Expected 120, got {factorial(5)}"\nassert factorial(7)==5040,f"Expected 5040, got {factorial(7)}"' },
+    { title:"Lock — Palindrome Check",
+      inst:"Write `is_palindrome(s)` — returns True if `s` (lowercased, letters only) reads the same forwards and backwards. Test with `'racecar'` and `'hello'`.",
+      start:'def is_palindrome(s):\n    cleaned = "".join(c.lower() for c in s if c.isalpha())\n    return cleaned == cleaned[::-1]\nprint(is_palindrome("racecar"))\nprint(is_palindrome("hello"))',
+      chk:'assert is_palindrome("racecar")==True,"racecar is a palindrome"\nassert is_palindrome("hello")==False,"hello is not a palindrome"\nassert is_palindrome("A man a plan a canal Panama")==True,"classic palindrome"' },
+  ],
+},
+
+random_lib: {
+  middle_intermediate: [
+    { title:"Lock — Random Selection",
+      inst:"Import `random`. Use `random.choice()` on `code_words` → `selected`. Use `random.randint(100,999)` → `pin`.",
+      start:'import random\ncode_words = ["ALPHA","BRAVO","CIPHER","DELTA","ECHO"]\nselected   = random.choice(code_words)\npin        = random.randint(100,999)\nprint(f"Code: {selected}-{pin}")',
+      chk:'assert isinstance(selected,str) and selected in code_words,"selected must be from code_words"\nassert isinstance(pin,int) and 100<=pin<=999,"pin must be 100-999"' },
+    { title:"Lock — Shuffle the Deck",
+      inst:"Import `random`. Create `deck = list(range(1,11))`. Use `random.shuffle(deck)` to shuffle it in place. Store the first element in `top_card`.",
+      start:'import random\ndeck     = list(range(1,11))\nrandom.shuffle(deck)\ntop_card = deck[0]\nprint(f"Deck: {deck}")\nprint(f"Top card: {top_card}")',
+      chk:'assert len(deck)==10,"deck must still have 10 cards"\nassert isinstance(top_card,int) and 1<=top_card<=10,"top_card must be 1-10"\nassert sorted(deck)==list(range(1,11)),"deck must contain all 10 cards"' },
+    { title:"Lock — Random Sample",
+      inst:"Import `random`. Given `agents = ['Alpha','Bravo','Cipher','Delta','Echo']`, use `random.sample(agents,3)` to pick 3 agents without replacement. Store in `selected_team`.",
+      start:'import random\nagents        = ["Alpha","Bravo","Cipher","Delta","Echo"]\nselected_team = random.sample(agents,3)\nprint(f"Selected: {selected_team}")',
+      chk:'assert len(selected_team)==3,"must select exactly 3"\nassert len(set(selected_team))==3,"no duplicates allowed"\nassert all(a in ["Alpha","Bravo","Cipher","Delta","Echo"] for a in selected_team),"all must be from agents list"' },
+  ],
+  high_intermediate: [
+    { title:"Lock — Passphrase Generator",
+      inst:"Write `generate_passphrase(words, n)` returning n randomly chosen words from `words` joined by `'-'`. Test with 3 words.",
+      start:'import random\ndef generate_passphrase(words, n):\n    return "-".join(random.choices(words, k=n))\nword_bank  = ["ghost","cipher","delta","night","shadow","vault"]\npassphrase = generate_passphrase(word_bank,3)\nprint(f"Passphrase: {passphrase}")',
+      chk:'assert callable(generate_passphrase)\nresult = generate_passphrase(["a","b","c"],3)\nassert isinstance(result,str),"result must be a string"\nassert len(result.split("-"))==3,"must have 3 words separated by dashes"' },
+    { title:"Lock — Dice Simulator",
+      inst:"Import `random`. Simulate rolling two dice 1000 times. Count how many times the sum equals 7 in `count_seven`. Print `count_seven`.",
+      start:'import random\ncount_seven = 0\nfor _ in range(1000):\n    die1 = random.randint(1,6)\n    die2 = random.randint(1,6)\n    if die1 + die2 == 7:\n        count_seven += 1\nprint(f"Sevens in 1000 rolls: {count_seven}")',
+      chk:'assert isinstance(count_seven,int),"count_seven must be an integer"\nassert 100<count_seven<250,"expected roughly 1/6 of 1000 rolls to be 7"' },
+    { title:"Lock — Seeded Shuffle",
+      inst:"Import `random`. Set seed 42 with `random.seed(42)`. Shuffle `data = list(range(10))` and store in `shuffled`. Print `shuffled[0]`.",
+      start:'import random\nrandom.seed(42)\ndata = list(range(10))\nrandom.shuffle(data)\nshuffled = data\nprint(f"First: {shuffled[0]}")',
+      chk:'assert shuffled[0]==1,f"With seed 42, first element should be 1, got {shuffled[0]}"' },
+  ],
+},
+
+};// end LIB
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SCENARIOS  (for library mode random pick)
+// ─────────────────────────────────────────────────────────────────────────────
+const SCENARIOS = {
+  primary:["You are a junior coder at **Cipher HQ**. The database has been locked by a rogue program. Solve each puzzle to recover a fragment of the override password!","A data thief has frozen the school robot fleet. Each robot is locked behind a code. Unlock them one by one!","Deep in the Space Academy archives, a mischievous AI scrambled all the security locks. Only a skilled coder can fix them!"],
+  middle:["You are a field operative. Your handler has gone dark. Crack each security lock using your training dossier.","The **Data Vault** was sealed after a breach. Work through each layer to recover the mission files.","Your submarine is locked down after a systems fault. Solve each diagnostic lock before oxygen runs out."],
+  high:["A hostile actor encrypted the agency network. Reverse-engineer each layer to recover the master decryption key.","You are a systems analyst. An unknown process locked production. Solve each diagnostic challenge to neutralise it.","A rogue AI has taken over the research station. Override each module in sequence to restore control."],
+};
+const BONUS = {
+  primary:"Can you print your variables in reverse order using `reversed()`?",
+  middle:"Wrap your main logic in `try/except` so undefined variables print a friendly message instead of crashing.",
+  high:"Write `validate_all(checks) -> bool` returning True only if every item is True. Test with two cases.",
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STATE & UTILITIES
+// ─────────────────────────────────────────────────────────────────────────────
+let sel = [];
+let mode = "library";
+
+function grp(g){ return g<=5?"primary":g<=8?"middle":"high" }
+function mkCode(n=5){ const c="ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; return Array.from({length:n},()=>c[Math.floor(Math.random()*c.length)]).join("") }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;") }
+function pickRand(arr){ return arr[Math.floor(Math.random()*arr.length)] }
+
+function getVariants(topicId, group, skill) {
+  const topic = LIB[topicId];
+  if (!topic) return null;
+  const key = `${group}_${skill}`;
+  return topic[key] || topic[`${group}_beginner`] || topic[`middle_${skill}`] || topic[`middle_beginner`] || null;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MODE TOGGLE
+// ─────────────────────────────────────────────────────────────────────────────
+function setMode(m) {
+  mode = m;
+  ["library","ai"].forEach(id => {
+    document.getElementById(`btn-${id}`).classList.toggle("active", id===m);
+    document.getElementById(`panel-${id}`).classList.toggle("on", id===m);
+  });
+  document.getElementById("gbtn").textContent = m==="ai" ? "✦ Generate with AI" : "Generate Escape Room";
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TOPIC GRID
+// ─────────────────────────────────────────────────────────────────────────────
+function renderT() {
+  const g = parseInt(document.getElementById("grade").value)||0;
+  const sk = document.getElementById("skill").value;
+  const group = g ? grp(g) : null;
+  const grid = document.getElementById("tgrid");
+  grid.innerHTML = "";
+  TOPICS.forEach(t => {
+    const ok = group ? t.groups.includes(group) && (!sk || t.skills.includes(sk)) : true;
+    const s = sel.includes(t.id);
+    const ord = s ? sel.indexOf(t.id)+1 : null;
+    const el = document.createElement("label");
+    el.className = `tc${s?" sel":""}${!ok?" dis":""}`;
+    el.innerHTML = `<input type="checkbox"${s?" checked":""}${!ok?" disabled":""}><span class="ti">${t.icon}</span><span style="flex:1"><span class="tn">${t.name}</span><br><span class="tt">Session ${t.tag}</span></span>${s?`<span class="tord">${ord}</span>`:""}`;
+    el.addEventListener("click", e => { e.preventDefault(); if(!ok) return; toggleT(t.id); });
+    grid.appendChild(el);
+  });
+}
+function toggleT(id) { sel.includes(id) ? sel=sel.filter(x=>x!==id) : sel.push(id); renderT(); }
+function clearT() { sel=[]; renderT(); }
+function suggest() {
+  const g = parseInt(document.getElementById("grade").value);
+  const sk = document.getElementById("skill").value;
+  if (!g||!sk) { document.getElementById("vm").textContent="Select grade and skill first."; return; }
+  const key = `${grp(g)}_${sk}`;
+  sel = [...(SUGGESTED[key]||[])]; renderT();
+}
+function toggleKey() {
+  const inp = document.getElementById("apikey");
+  inp.type = inp.type==="password" ? "text" : "password";
+  event.target.textContent = inp.type==="password" ? "Show" : "Hide";
+}
+
+document.getElementById("fmt").addEventListener("change", function(){
+  document.getElementById("tsrow").classList.toggle("on", this.value==="team");
+});
+["grade","skill"].forEach(id => document.getElementById(id).addEventListener("change", renderT));
+
+// ─────────────────────────────────────────────────────────────────────────────
+// VALIDATION
+// ─────────────────────────────────────────────────────────────────────────────
+function validate() {
+  const vm = document.getElementById("vm");
+  const g = parseInt(document.getElementById("grade").value);
+  const sk = document.getElementById("skill").value;
+  const fmt = document.getElementById("fmt").value;
+  if (mode==="ai") {
+    const k = document.getElementById("apikey").value.trim();
+    if (!k||!k.startsWith("sk-ant-")) { vm.textContent="Enter a valid API key (sk-ant-...)."; return false; }
+  }
+  if (!g)          { vm.textContent="Select a grade."; return false; }
+  if (!sk)         { vm.textContent="Select a skill level."; return false; }
+  if (!fmt)        { vm.textContent="Select a format."; return false; }
+  if (!sel.length) { vm.textContent="Select at least one topic."; return false; }
+  vm.textContent = ""; return true;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GENERATE DISPATCHER
+// ─────────────────────────────────────────────────────────────────────────────
+function generate() {
+  if (!validate()) return;
+  mode==="library" ? generateLibrary() : generateAI();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LIBRARY GENERATION
+// ─────────────────────────────────────────────────────────────────────────────
+function generateLibrary() {
+  const g = parseInt(document.getElementById("grade").value);
+  const sk = document.getElementById("skill").value;
+  const fmt = document.getElementById("fmt").value;
+  const tsz = parseInt(document.getElementById("tsz").value)||3;
+  const group = grp(g);
+  const scenario = pickRand(SCENARIOS[group]);
+  const frags = Array.from({length: fmt==="team"?tsz:sel.length}, ()=>mkCode());
+  const files = [];
+
+  if (fmt==="solo") {
+    const locks = sel.map((id,i) => {
+      const variants = getVariants(id, group, sk);
+      const v = variants ? pickRand(variants) : null;
+      return v ? {...v, fragment:frags[i], topicId:id} : null;
+    }).filter(Boolean);
+    files.push({ name:`escape_room_grade${g}_${sk}_solo.ipynb`, nb:buildSoloNb(g,sk,group,scenario,locks,frags) });
+  } else {
+    const assigned = Array.from({length:tsz},(_,i)=>sel[i%sel.length]);
+    for (let i=0;i<tsz;i++) {
+      const variants = getVariants(assigned[i], group, sk);
+      const v = variants ? pickRand(variants) : null;
+      if (!v) continue;
+      const lock = {...v, fragment:frags[i], topicId:assigned[i]};
+      files.push({ name:`escape_room_grade${g}_${sk}_team_student${String.fromCharCode(65+i)}.ipynb`, nb:buildTeamNb(g,sk,group,scenario,lock,i,tsz,frags) });
+    }
+  }
+
+  showDownloads(files, scenario, files[0] ? getFirstLockPreview(fmt,frags,sel,group,sk) : null);
+}
+
+function getFirstLockPreview(fmt, frags, topicIds, group, sk) {
+  const variants = getVariants(topicIds[0], group, sk);
+  return variants ? pickRand(variants) : null;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AI GENERATION
+// ─────────────────────────────────────────────────────────────────────────────
+async function generateAI() {
+  const apiKey = document.getElementById("apikey").value.trim();
+  const g = parseInt(document.getElementById("grade").value);
+  const sk = document.getElementById("skill").value;
+  const fmt = document.getElementById("fmt").value;
+  const tsz = parseInt(document.getElementById("tsz").value)||3;
+  const theme = document.getElementById("theme").value.trim();
+  const group = grp(g);
+
+  document.getElementById("gbtn").disabled = true;
+  const topicNames = sel.map(id => TOPICS.find(t=>t.id===id)?.name||id);
+  const frags = Array.from({length: fmt==="team"?tsz:sel.length}, ()=>mkCode());
+
+  const stepLabels = ["Generating scenario…"];
+  const lockTopics = fmt==="solo" ? sel : Array.from({length:tsz},(_,i)=>sel[i%sel.length]);
+  lockTopics.forEach((id,i) => stepLabels.push(`${fmt==="team"?`Student ${String.fromCharCode(65+i)}`:`Lock ${i+1}`}: ${TOPICS.find(t=>t.id===id)?.name||id}`));
+  stepLabels.push("Assembling notebooks…");
+  showProgress(stepLabels);
+
+  try {
+    setStep(0,"active");
+    const scenario = await callClaude(apiKey, buildScenarioPrompt(group,sk,theme,topicNames), 200);
+    setStep(0,"done", scenario.slice(0,80)+"…");
+
+    const locks = [];
+    for (let i=0;i<lockTopics.length;i++) {
+      setStep(i+1,"active");
+      const raw = await callClaude(apiKey, buildLockPrompt(lockTopics[i],group,sk,theme,i+1,lockTopics.length,scenario), 900);
+      let lockData;
+      try { lockData = JSON.parse(raw.replace(/```json|```/g,"").trim()); }
+      catch(e) { throw new Error(`Lock ${i+1} returned invalid JSON. Try generating again.`); }
+      lockData.fragment = frags[i];
+      lockData.topicId  = lockTopics[i];
+      locks.push(lockData);
+      setStep(i+1,"done", lockData.title);
+    }
+
+    const asmIdx = lockTopics.length+1;
+    setStep(asmIdx,"active");
+    const files = [];
+    if (fmt==="solo") {
+      files.push({name:`escape_room_grade${g}_${sk}_solo.ipynb`, nb:buildSoloNb(g,sk,group,scenario,locks,frags)});
+    } else {
+      locks.forEach((lock,idx) => {
+        files.push({name:`escape_room_grade${g}_${sk}_team_student${String.fromCharCode(65+idx)}.ipynb`, nb:buildTeamNb(g,sk,group,scenario,lock,idx,tsz,frags)});
+      });
+    }
+    setStep(asmIdx,"done");
+    showDownloads(files, scenario, locks[0]);
+  } catch(err) {
+    const errBox = document.createElement("div");
+    errBox.style.cssText="border:2px solid var(--rust);padding:14px;background:#faf5f0;font-size:.76rem;line-height:1.6;margin-top:10px;animation:si .2s ease";
+    errBox.innerHTML=`<strong style="color:var(--rust)">Generation failed</strong><br>${esc(err.message)}<br><br><span style="color:var(--dim)">Check your API key. If this persists, try fewer topics.</span>`;
+    document.getElementById("main").appendChild(errBox);
+  } finally {
+    document.getElementById("gbtn").disabled = false;
+  }
+}
+
+async function callClaude(apiKey, prompt, maxTokens=800) {
+  const resp = await fetch("https://api.anthropic.com/v1/messages", {
+    method:"POST",
+    headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+    body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:maxTokens,messages:[{role:"user",content:prompt}]})
+  });
+  if (!resp.ok) { const e=await resp.json().catch(()=>({})); throw new Error(e?.error?.message||`API error ${resp.status}`); }
+  const data = await resp.json();
+  return data.content[0].text;
+}
+
+function buildScenarioPrompt(group,sk,theme,topicNames) {
+  const th = theme?`Theme: "${theme}".`:"Use an engaging spy/mission/mystery theme.";
+  const gd = group==="primary"?"ages 8-11":group==="middle"?"ages 11-14":"ages 14-17";
+  return `Write a 2-sentence escape room scenario for a Python coding challenge. Students: ${gd}. ${th} Topics: ${topicNames.join(", ")}. Explain WHY they need to code their way out. Respond with ONLY the scenario text, no quotes or extra formatting.`;
+}
+
+function buildLockPrompt(topicId,group,sk,theme,num,total,scenario) {
+  const th = theme?`The escape room theme is: "${theme}".`:"Use a spy/mission/data-vault theme.";
+  const gd = group==="primary"?"ages 8-11 (grades 3-5)":group==="middle"?"ages 11-14 (grades 6-8)":"ages 14-17 (grades 9-11)";
+  const tname = TOPICS.find(t=>t.id===topicId)?.name||topicId;
+  return `You are generating Lock ${num} of ${total} for a Python escape room (Google Colab).
+CONTEXT: Students: ${gd}, skill: ${sk}. Concept: ${tname}. ${th} Scenario: "${scenario}"
+TASK: Generate this JSON for one lock. Be creative — invent fresh data and variable names.
+RULES:
+1. instructions: 2-4 sentences, clear task, name exact output variables, age-appropriate.
+2. starter_code: working Python with TODO comments. Declare all output variables upfront. Include print statements.
+3. check_code: 1-4 assert statements. CRITICAL: logically correct. Use assert with a plain string message. No f-strings inside assert messages. Example: assert x == 5, "x should be 5"
+Respond ONLY with valid JSON, no markdown:
+{"title":"evocative title","instructions":"...","starter_code":"...","check_code":"assert ..."}`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PROGRESS UI
+// ─────────────────────────────────────────────────────────────────────────────
+function showProgress(steps) {
+  const main = document.getElementById("main");
+  main.innerHTML = "";
+  const prog = document.createElement("div");
+  prog.className = "progress on";
+  prog.innerHTML = `<h3>Generating…</h3><div id="psteps"></div>`;
+  main.appendChild(prog);
+  const container = document.getElementById("psteps");
+  steps.forEach((s,i) => {
+    const el = document.createElement("div");
+    el.className = "pstep"; el.id = `pstep-${i}`;
+    el.innerHTML = `<span class="ps-icon">⏳</span><div><div>${s}</div><div class="ps-detail" id="pd-${i}"></div></div>`;
+    container.appendChild(el);
+  });
+}
+function setStep(i,state,detail="") {
+  const el = document.getElementById(`pstep-${i}`); if(!el) return;
+  el.className = `pstep ${state}`;
+  const icons = {active:`<div class="spinner"></div>`,done:"✅",error:"❌"};
+  el.querySelector(".ps-icon").innerHTML = icons[state]||"⏳";
+  if(detail) document.getElementById(`pd-${i}`).textContent = detail;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// NOTEBOOK BUILDERS
+// ─────────────────────────────────────────────────────────────────────────────
+function nbShell(cells){return{nbformat:4,nbformat_minor:5,metadata:{kernelspec:{display_name:"Python 3",language:"python",name:"python3"},language_info:{name:"python",version:"3.10.0"},colab:{provenance:[]}},cells}}
+function nbMd(s){return{cell_type:"markdown",metadata:{},source:s}}
+function nbCd(s){return{cell_type:"code",execution_count:null,metadata:{},outputs:[],source:s}}
+
+function introC(title,group,sk,scenario,teamNote) {
+  let b=`# 🔐 ${title}\n\n**Group:** ${group[0].toUpperCase()+group.slice(1)} | **Skill:** ${sk[0].toUpperCase()+sk.slice(1)}\n\n---\n\n## The Scenario\n\n${scenario}`;
+  if(teamNote) b+=`\n\n---\n\n${teamNote}`;
+  b+=`\n\n---\n\n## How It Works\n\n- Each lock: **instructions → your code → check cell**\n- Correct code reveals a **fragment**\n- Collect all fragments to assemble the **final password**\n\n**Rules:** write your own code · use index cards for syntax · ask a classmate before the teacher`;
+  return [nbMd(b), nbCd("# Run this first\n_frags = []\nprint('🚀 Escape room ready.')")];
+}
+
+function lockCells(lock, group, num, total) {
+  const checkSrc = lock.check_code || lock.chk || "";
+  const startSrc = lock.starter_code || lock.start || "";
+  const instrSrc = lock.instructions || lock.inst || "";
+  const ind = checkSrc.split("\n").map(l=>"    "+l).join("\n");
+  const chkSrc = `# Check cell — do not edit\n_frags = globals().get('_frags', [])\ntry:\n${ind}\n    _frags.append("${lock.fragment}")\n    print(f"✅  Lock ${num} open! Fragment: ${lock.fragment}")\nexcept AssertionError as e:\n    print(f"❌  Not yet — {e}")\nexcept Exception as e:\n    print(f"⚠️  Error — {e}")`;
+  return [
+    nbMd(`## 🔒 ${lock.title}\n\n**Concept:** ${(lock.topicId||"").replace(/_/g," ")} | Lock ${num} of ${total}\n\n${instrSrc}\n\n---`),
+    nbCd(`# Your code here\n\n${startSrc}`),
+    nbCd(chkSrc)
+  ];
+}
+
+function finalCells(frags, group) {
+  const n=frags.length; const pw=frags.join("-");
+  return [
+    nbMd("## 🏁 Final Lock\n\nAll fragments collected? Run the cell below."),
+    nbCd(`_frags = globals().get('_frags', [])\nif len(_frags) == ${n}:\n    print(f"🎉 PASSWORD UNLOCKED: ${pw}")\nelse:\n    print(f"🔒 {'{'}len(_frags){'}'} /${n} fragments. Keep going.")`),
+    nbMd(`## ⭐ Bonus — Optional\n\n${BONUS[group]}\n\n*Does not affect your password.*`),
+    nbCd("# Your bonus code here\n")
+  ];
+}
+
+function buildSoloNb(g,sk,group,scenario,locks,frags) {
+  const cells = introC(`Escape Room — Grade ${g} (${sk[0].toUpperCase()+sk.slice(1)})`,group,sk,scenario,"");
+  locks.forEach((lock,i) => cells.push(...lockCells(lock,group,i+1,locks.length)));
+  cells.push(...finalCells(frags,group));
+  return nbShell(cells);
+}
+
+function buildTeamNb(g,sk,group,scenario,lock,idx,tsz,frags) {
+  const lbl=String.fromCharCode(65+idx);
+  const prev=idx>0?String.fromCharCode(65+idx-1):null;
+  const next=idx<tsz-1?String.fromCharCode(65+idx+1):null;
+  const prevF=idx>0?frags[idx-1]:null;
+  let note=`## 🔗 Team Chain — Student ${lbl} of ${tsz}\n\n`;
+  note+=idx===0?`You are **first**. No entry code needed. Solve your lock then pass your fragment to **Student ${next}**.`:idx===tsz-1?`⚠️ Wait for **Student ${prev}'s fragment** before starting.\n\nYou are **last**. Assemble the final password.`:`⚠️ Wait for **Student ${prev}'s fragment** before starting.\n\nOnce done, pass your fragment to **Student ${next}**.`;
+  const cells=introC(`Escape Room — Grade ${g} (${sk[0].toUpperCase()+sk.slice(1)}) — Student ${lbl}`,group,sk,scenario,note);
+  const gate=idx===0?`# No entry code needed\n_frags=[]\nprint("🚀 Chain started.")`:`entry_code=input("Entry code from Student ${prev}: ")\nif entry_code.strip().upper()=="${prevF}":\n    _frags=[]\n    print("✅ Accepted.")\nelse:\n    print("❌ Wrong code.")`;
+  cells.push(nbCd(gate));
+  cells.push(...lockCells(lock,group,1,1));
+  if(idx<tsz-1) cells.push(nbMd(`## 🔁 Hand Off\n\nLock open? Pass your fragment to **Student ${next}**. Don't share early.`));
+  else { cells.push(...finalCells(frags,group)); cells.push(nbMd("## 🏆 Chain Complete!\n\nRaise your hand — your team has escaped!")); }
+  return nbShell(cells);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DOWNLOAD + PREVIEW
+// ─────────────────────────────────────────────────────────────────────────────
+function showDownloads(files, scenario, previewLock) {
+  const main = document.getElementById("main");
+  main.innerHTML = "";
+
+  const dl = document.createElement("div");
+  dl.className = "dls on";
+  dl.innerHTML = `<h3>✅ ${files.length} file${files.length!==1?"s":""} ready</h3><div class="dlf"></div>`;
+  main.appendChild(dl);
+  const dlf = dl.querySelector(".dlf");
+  files.forEach(({name,nb}) => {
+    const blob=new Blob([JSON.stringify(nb,null,2)],{type:"application/json"});
+    const url=URL.createObjectURL(blob);
+    const row=document.createElement("div"); row.className="dlr";
+    row.innerHTML=`<span class="fn">${name}</span><a class="dlb" href="${url}" download="${name}">↓ Download</a>`;
+    dlf.appendChild(row);
+  });
+
+  if (previewLock) {
+    const ph=document.createElement("div"); ph.className="ph";
+    ph.innerHTML=`<h2>Preview — ${esc(previewLock.title||"Lock 1")}</h2><span class="badge">${mode==="ai"?"AI-generated":"Library"}</span>`;
+    main.appendChild(ph);
+    const nb=document.createElement("div"); nb.className="nbp";
+    nb.appendChild(mkCell("md", previewLock.title||"", previewLock.instructions||previewLock.inst||""));
+    nb.appendChild(mkCell("cd", "Starter", previewLock.starter_code||previewLock.start||""));
+    nb.appendChild(mkCell("ch", "Check",   previewLock.check_code||previewLock.chk||""));
+    main.appendChild(nb);
+  }
+}
+
+function mkCell(type,title,content) {
+  const c=document.createElement("div");
+  c.className=`nbc ${type==="md"?"mdc":type==="cd"?"cdc":"chc"}`;
+  const lt=type==="md"?"md":type==="cd"?"cd":"ch";
+  const ln=type==="md"?"Markdown":type==="cd"?"Code":"Check";
+  c.innerHTML=`<div class="nbl ${lt}">${ln}</div>`+(type==="md"?`<h3>${esc(title)}</h3><p>${esc(content)}</p>`:`<pre>${esc(content)}</pre>`);
+  return c;
+}
+
+renderT();
+</script>
+</body>
+</html>
