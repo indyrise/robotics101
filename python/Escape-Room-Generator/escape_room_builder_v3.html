@@ -1069,11 +1069,14 @@ function introC(title,group,sk,scenario,teamNote) {
 }
 
 function lockCells(lock, group, num, total) {
-  const ind = lock.check_code.split("\n").map(l=>"    "+l).join("\n");
+  const checkSrc = lock.check_code || lock.chk || "";
+  const startSrc = lock.starter_code || lock.start || "";
+  const instrSrc = lock.instructions || lock.inst || "";
+  const ind = checkSrc.split("\n").map(l=>"    "+l).join("\n");
   const chkSrc = `# Check cell — do not edit\n_frags = globals().get('_frags', [])\ntry:\n${ind}\n    _frags.append("${lock.fragment}")\n    print(f"✅  Lock ${num} open! Fragment: ${lock.fragment}")\nexcept AssertionError as e:\n    print(f"❌  Not yet — {e}")\nexcept Exception as e:\n    print(f"⚠️  Error — {e}")`;
   return [
-    nbMd(`## 🔒 ${lock.title}\n\n**Concept:** ${(lock.topicId||"").replace(/_/g," ")} | Lock ${num} of ${total}\n\n${lock.instructions}\n\n---`),
-    nbCd(`# Your code here\n\n${lock.starter_code||lock.start}`),
+    nbMd(`## 🔒 ${lock.title}\n\n**Concept:** ${(lock.topicId||"").replace(/_/g," ")} | Lock ${num} of ${total}\n\n${instrSrc}\n\n---`),
+    nbCd(`# Your code here\n\n${startSrc}`),
     nbCd(chkSrc)
   ];
 }
